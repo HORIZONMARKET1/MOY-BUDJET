@@ -2,7 +2,7 @@
 <html lang="ru" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0B0E11">
 <title>МОЙ БЮДЖЕТ</title>
 
@@ -46,8 +46,11 @@ html[data-theme="dark"]{
   --line:rgba(255,255,255,.08); --shadow:0 8px 32px rgba(0,0,0,.45);
   --glass:rgba(20,26,32,.75); --nav:rgba(12,16,20,.82);
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;min-width:0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;min-width:0;touch-action:manipulation}
 html,body{margin:0;padding:0;height:100%;width:100%;overflow-x:hidden}
+html{touch-action:manipulation}
+input,select,textarea,button{font-size:16px}
+.inp,select.inp,textarea.inp{font-size:16px}
 body{
   background:var(--bg);color:var(--txt);
   font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -267,14 +270,14 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 <!-- ============ SPLASH ============ -->
 <div id="splash" class="active">
   <div class="splash-logo">💰</div>
-  <div class="splash-title">МОЙ БЮДЖЕТ</div>
-  <div class="splash-sub">Управляй деньгами. Планируй будущее.</div>
+  <div class="splash-title" data-i18n="app_name">МОЙ БЮДЖЕТ</div>
+  <div class="splash-sub" data-i18n="app_tag">Управляй деньгами. Планируй будущее.</div>
   <div class="splash-bar"><i></i></div>
 </div>
 
 <!-- ============ ONBOARDING ============ -->
 <div id="onboarding" class="screen">
-  <button class="ob-skip" onclick="Onb.finish()">Пропустить</button>
+  <button class="ob-skip" onclick="Onb.finish()" data-i18n="ob_skip">Пропустить</button>
   <div class="ob-body">
     <div class="ob-emoji" id="obE">💰</div>
     <h1 class="ob-h" id="obH"></h1>
@@ -289,54 +292,70 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
   <div style="padding:calc(28px + var(--safe-t)) 20px calc(30px + var(--safe-b))">
     <div style="text-align:center;margin-bottom:24px">
       <div class="splash-logo" style="margin:0 auto 14px;width:64px;height:64px;font-size:30px;border-radius:20px"></div>
-      <h1 style="font-size:24px;font-weight:800;margin:0">МОЙ БЮДЖЕТ</h1>
-      <p class="mut" style="margin:6px 0 0;font-size:14px">Управляй деньгами. Планируй будущее.</p>
+      <h1 style="font-size:24px;font-weight:800;margin:0" data-i18n="app_name">МОЙ БЮДЖЕТ</h1>
+      <p class="mut" style="margin:6px 0 0;font-size:14px" data-i18n="app_tag">Управляй деньгами. Планируй будущее.</p>
     </div>
     <div class="seg" style="margin-bottom:20px">
-      <button id="tabLogin" class="on" onclick="Auth.tab('login')">Вход</button>
-      <button id="tabReg" onclick="Auth.tab('reg')">Регистрация</button>
+      <button id="tabLogin" class="on" onclick="Auth.tab('login')" data-i18n="tab_login">Вход</button>
+      <button id="tabReg" onclick="Auth.tab('reg')" data-i18n="tab_reg">Регистрация</button>
     </div>
 
     <form id="formLogin" onsubmit="Auth.login(event)">
-      <div class="field"><label>Телефон</label><input class="inp" id="lgPhone" type="tel" inputmode="tel" placeholder="+992 900 00 00 00" required></div>
-      <div class="field"><label>Пароль</label><input class="inp" id="lgPass" type="password" placeholder="••••••••" required></div>
-      <button class="btn" type="submit" id="lgBtn" style="margin-top:8px">ВОЙТИ</button>
-      <button class="btn ghost" type="button" style="margin-top:10px" onclick="Auth.reset()">Забыли пароль?</button>
+      <div class="field"><label data-i18n="f_phone">Телефон</label>
+        <div class="row" style="gap:8px">
+          <button type="button" class="inp" id="lgCodeBtn" onclick="CP.open('lgPhone')"
+            style="width:104px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 8px">
+            <span id="lgCodeFlag">🇹🇯</span><span id="lgCodeVal" style="font-weight:600">+992</span></button>
+          <input class="inp grow" id="lgPhone" type="tel" inputmode="tel" placeholder="900 00 00 00" required>
+        </div>
+      </div>
+      <div class="field"><label data-i18n="f_pass">Пароль</label><input class="inp" id="lgPass" type="password" placeholder="••••••••" required></div>
+      <button class="btn" type="submit" id="lgBtn" style="margin-top:8px" data-i18n="btn_login">ВОЙТИ</button>
+      <button class="btn ghost" type="button" style="margin-top:10px" onclick="Auth.reset()" data-i18n="f_forgot">Забыли пароль?</button>
     </form>
 
     <form id="formReg" class="hide" onsubmit="Auth.submitReg(event)">
       <div id="regStep1">
       <div class="row" style="gap:10px">
-        <div class="field grow"><label>Имя *</label><input class="inp" id="rgFirst" required></div>
-        <div class="field grow"><label>Фамилия *</label><input class="inp" id="rgLast" required></div>
+        <div class="field grow"><label data-i18n="f_first">Имя *</label><input class="inp" id="rgFirst" required></div>
+        <div class="field grow"><label data-i18n="f_last">Фамилия *</label><input class="inp" id="rgLast" required></div>
       </div>
-      <div class="field"><label>Отчество</label><input class="inp" id="rgMiddle" placeholder="необязательно"></div>
+      <div class="field"><label data-i18n="f_middle">Отчество</label><input class="inp" id="rgMiddle" placeholder="необязательно"></div>
       <div class="row" style="gap:10px">
-        <div class="field grow"><label>Дата рождения</label><input class="inp" id="rgBirth" type="date"></div>
-        <div class="field grow"><label>Пол</label>
-          <select class="inp" id="rgGender"><option value="">—</option><option value="male">Мужской</option><option value="female">Женский</option></select>
+        <div class="field grow"><label data-i18n="f_birth">Дата рождения</label><input class="inp" id="rgBirth" type="date"></div>
+        <div class="field grow"><label data-i18n="f_gender">Пол</label>
+          <select class="inp" id="rgGender"><option value="">—</option>
+            <option value="male" data-i18n="f_gender_m">Мужской</option>
+            <option value="female" data-i18n="f_gender_f">Женский</option></select>
         </div>
       </div>
-      <div class="field"><label>Телефон *</label><input class="inp" id="rgPhone" type="tel" inputmode="tel" placeholder="+992 900 00 00 00" required></div>
-      <div class="field"><label>Пароль * (мин. 6 символов)</label><input class="inp" id="rgPass" type="password" minlength="6" required></div>
-      <p class="mut3" style="font-size:12px;margin:4px 6px 14px">Регистрируясь, вы принимаете условия использования и политику конфиденциальности.</p>
+      <div class="field"><label data-i18n="f_phone_req">Телефон *</label>
+        <div class="row" style="gap:8px">
+          <button type="button" class="inp" id="rgCodeBtn" onclick="CP.open('rgPhone')"
+            style="width:104px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 8px">
+            <span id="rgCodeFlag">🇹🇯</span><span id="rgCodeVal" style="font-weight:600">+992</span></button>
+          <input class="inp grow" id="rgPhone" type="tel" inputmode="tel" placeholder="900 00 00 00" required>
+        </div>
+      </div>
+      <div class="field"><label data-i18n="f_pass_hint">Пароль * (мин. 6 символов)</label><input class="inp" id="rgPass" type="password" minlength="6" required></div>
+      <p class="mut3" style="font-size:12px;margin:4px 6px 14px" data-i18n="reg_consent">Регистрируясь, вы принимаете условия использования и политику конфиденциальности.</p>
       </div>
 
       <div id="regStep2" class="hide">
         <div class="card" style="text-align:center;margin-bottom:16px">
           <div style="font-size:38px">💬</div>
-          <div style="font-weight:800;font-size:17px;margin-top:4px">Подтверждение номера</div>
-          <p class="mut" id="rgCodeHint" style="font-size:13.5px;margin:8px 0 0">Нажмите «Получить код» — откроется Telegram, и бот пришлёт вам код авторизации.</p>
+          <div style="font-weight:800;font-size:17px;margin-top:4px" data-i18n="otp_title">Подтверждение номера</div>
+          <p class="mut" id="rgCodeHint" style="font-size:13.5px;margin:8px 0 0" data-i18n="otp_hint">Нажмите «Получить код» — откроется Telegram, и бот пришлёт вам код авторизации.</p>
         </div>
-        <div class="field"><label>Код авторизации</label>
+        <div class="field"><label data-i18n="f_code">Код авторизации</label>
           <input class="inp" id="rgCode" inputmode="numeric" maxlength="6" placeholder="— — — — — —"
             style="text-align:center;font-size:26px;font-weight:800;letter-spacing:8px"></div>
-        <button class="btn soft" type="button" id="rgGetCode" onclick="OTP.request()">📲 ПОЛУЧИТЬ КОД В TELEGRAM</button>
-        <button class="btn" type="submit" id="rgBtn" style="margin-top:10px">ПОДТВЕРДИТЬ И СОЗДАТЬ АККАУНТ</button>
+        <button class="btn soft" type="button" id="rgGetCode" onclick="OTP.request()" data-i18n="btn_get_code">📲 ПОЛУЧИТЬ КОД В TELEGRAM</button>
+        <button class="btn" type="submit" id="rgBtn" style="margin-top:10px" data-i18n="btn_confirm_create">ПОДТВЕРДИТЬ И СОЗДАТЬ АККАУНТ</button>
         <button class="btn ghost" type="button" style="margin-top:10px;background:none;border:0;color:var(--txt2);height:44px"
-          onclick="OTP.back()">‹ Изменить данные</button>
+          onclick="OTP.back()" data-i18n="btn_change_data">‹ Изменить данные</button>
       </div>
-      <button class="btn" type="submit" id="rgNext">ПРОДОЛЖИТЬ</button>
+      <button class="btn" type="submit" id="rgNext" data-i18n="btn_continue">ПРОДОЛЖИТЬ</button>
     </form>
   </div>
 </div>
@@ -345,13 +364,13 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 <div id="setup" class="screen">
   <div style="padding:calc(28px + var(--safe-t)) 20px calc(30px + var(--safe-b))">
     <h1 id="stHello" style="font-size:24px;font-weight:800;margin:0 0 4px"></h1>
-    <p class="mut" style="margin:0 0 24px">Настроим ваш бюджет за 3 шага</p>
+    <p class="mut" style="margin:0 0 24px" data-i18n="st_sub">Настроим ваш бюджет за 3 шага</p>
     <div class="dots" id="stDots" style="justify-content:flex-start;margin-bottom:22px"></div>
 
     <div id="st1">
-      <h2 style="font-size:20px;margin:0 0 16px">Какая у вас зарплата?</h2>
-      <div class="field"><label>Сумма</label><input class="inp" id="stAmount" type="number" inputmode="decimal" placeholder="8000" style="font-size:22px;font-weight:700"></div>
-      <div class="field"><label>Валюта</label>
+      <h2 style="font-size:20px;margin:0 0 16px" data-i18n="st1_h">Какая у вас зарплата?</h2>
+      <div class="field"><label data-i18n="st1_amount">Сумма</label><input class="inp" id="stAmount" type="number" inputmode="decimal" placeholder="8000" style="font-size:22px;font-weight:700"></div>
+      <div class="field"><label data-i18n="st1_currency">Валюта</label>
         <select class="inp" id="stCurrency">
           <option value="TJS">TJS — сомони (с.)</option><option value="USD">USD — доллар ($)</option>
           <option value="EUR">EUR — евро (€)</option><option value="RUB">RUB — рубль (₽)</option>
@@ -361,28 +380,28 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
     </div>
 
     <div id="st2" class="hide">
-      <h2 style="font-size:20px;margin:0 0 16px">Когда вы получаете зарплату?</h2>
-      <div class="field"><label>Периодичность</label>
-        <select class="inp" id="stFreq"><option value="monthly">Каждый месяц</option><option value="weekly">Каждую неделю</option><option value="none">Нерегулярно</option></select>
+      <h2 style="font-size:20px;margin:0 0 16px" data-i18n="st2_h">Когда вы получаете зарплату?</h2>
+      <div class="field"><label data-i18n="st2_freq">Периодичность</label>
+        <select class="inp" id="stFreq"><option value="monthly" data-i18n="st2_monthly">Каждый месяц</option><option value="weekly" data-i18n="st2_weekly">Каждую неделю</option><option value="none" data-i18n="st2_none">Нерегулярно</option></select>
       </div>
-      <div class="field" id="stDayWrap"><label>Число месяца</label>
+      <div class="field" id="stDayWrap"><label data-i18n="st2_day">Число месяца</label>
         <select class="inp" id="stDay"></select>
       </div>
       <p class="mut3" style="font-size:12.5px;margin:10px 4px">Доход будет автоматически добавляться в баланс в этот день.</p>
     </div>
 
     <div id="st3" class="hide">
-      <h2 style="font-size:20px;margin:0 0 6px">Есть обязательные платежи?</h2>
-      <p class="mut" style="margin:0 0 16px;font-size:14px">Квартира, интернет, кредит — добавим напоминания.</p>
+      <h2 style="font-size:20px;margin:0 0 6px" data-i18n="st3_h">Есть обязательные платежи?</h2>
+      <p class="mut" style="margin:0 0 16px;font-size:14px" data-i18n="st3_p">Квартира, интернет, кредит — добавим напоминания.</p>
       <div id="stPayList"></div>
-      <button class="btn soft" type="button" onclick="Setup.addPayment()" style="margin-top:8px">＋ Добавить платёж</button>
+      <button class="btn soft" type="button" onclick="Setup.addPayment()" style="margin-top:8px" data-i18n="st3_add">＋ Добавить платёж</button>
     </div>
 
     <div class="row" style="gap:10px;margin-top:26px">
-      <button class="btn ghost" id="stBack" onclick="Setup.back()" style="flex:0 0 40%">Назад</button>
-      <button class="btn" id="stNext" onclick="Setup.next()">ДАЛЕЕ</button>
+      <button class="btn ghost" id="stBack" onclick="Setup.back()" style="flex:0 0 40%" data-i18n="st_back">Назад</button>
+      <button class="btn" id="stNext" onclick="Setup.next()" data-i18n="st_next">ДАЛЕЕ</button>
     </div>
-    <button class="btn ghost" id="stSkip" onclick="Setup.skip()" style="margin-top:10px;background:none;border:0;color:var(--txt2);height:44px">Пропустить настройку</button>
+    <button class="btn ghost" id="stSkip" onclick="Setup.skip()" style="margin-top:10px;background:none;border:0;color:var(--txt2);height:44px" data-i18n="st_skip">Пропустить настройку</button>
   </div>
 </div>
 
@@ -414,11 +433,11 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
   <div class="view active" id="v-home">
     <div style="height:16px"></div>
     <div class="balance">
-      <div class="lab">МОЙ БАЛАНС</div>
+      <div class="lab" data-i18n="bal_title">МОЙ БАЛАНС</div>
       <div class="big amount" id="bBal">—</div>
       <div class="io">
-        <div><span>↑ ДОХОД</span><b class="amount" id="bInc">—</b></div>
-        <div><span>↓ РАСХОД</span><b class="amount" id="bExp">—</b></div>
+        <div><span>↑ <span data-i18n="bal_income">ДОХОД</span></span><b class="amount" id="bInc">—</b></div>
+        <div><span>↓ <span data-i18n="bal_expense">РАСХОД</span></span><b class="amount" id="bExp">—</b></div>
       </div>
     </div>
     <div id="homeAlerts"></div>
@@ -429,7 +448,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
       <button class="mut" style="font-size:13px;font-weight:600;color:var(--accent)" onclick="Nav.go('history')">Все</button>
     </div>
     <div id="homeTx"></div>
-    <button class="btn" style="margin-top:18px" onclick="AddTx.open()">＋ Добавить расход</button>
+    <button class="btn" style="margin-top:18px" onclick="AddTx.open()" data-i18n="add_expense">＋ Добавить расход</button>
   </div>
 
   <!-- ANALYTICS -->
@@ -501,7 +520,7 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
     <div id="aiBody"></div>
   </div>
   <div class="ai-input hide" id="aiInputBar">
-    <input class="inp grow" id="aiQ" placeholder="Спросите о своих финансах…" onkeydown="if(event.key==='Enter')AI.send()" autocomplete="off">
+    <input class="inp grow" id="aiQ" placeholder="Спросите о своих финансах…" data-i18n-ph="ai_ph" onkeydown="if(event.key==='Enter')AI.send()" autocomplete="off">
     <button class="btn" style="width:52px;flex:none;height:52px;border-radius:16px;font-size:19px" onclick="AI.send()">➤</button>
   </div>
 
@@ -510,11 +529,11 @@ select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50
 
   <!-- NAV -->
   <div class="nav" id="nav">
-    <button data-v="home" class="on" onclick="Nav.go('home')"><span class="n-i">🏠</span>Главная</button>
-    <button data-v="analytics" onclick="Nav.go('analytics')"><span class="n-i">📊</span>Аналитика</button>
+    <button data-v="home" class="on" onclick="Nav.go('home')"><span class="n-i">🏠</span><span data-i18n="nav_home">Главная</span></button>
+    <button data-v="analytics" onclick="Nav.go('analytics')"><span class="n-i">📊</span><span data-i18n="nav_analytics">Аналитика</span></button>
     <div class="fab-slot"><button class="fab" onclick="AddTx.open()">＋</button></div>
-    <button data-v="goals" onclick="Nav.go('goals')"><span class="n-i">🎯</span>Цели</button>
-    <button data-v="profile" onclick="Nav.go('profile')"><span class="n-i">👤</span>Профиль</button>
+    <button data-v="goals" onclick="Nav.go('goals')"><span class="n-i">🎯</span><span data-i18n="nav_goals">Цели</span></button>
+    <button data-v="profile" onclick="Nav.go('profile')"><span class="n-i">👤</span><span data-i18n="nav_profile">Профиль</span></button>
   </div>
 </div>
 
@@ -653,22 +672,238 @@ const Sheet = {
 /* ===================== SCREENS ===================== */
 function show(id){ ['splash','onboarding','auth','setup','app'].forEach(x=>$(x).classList.toggle('active',x===id)); }
 
+/* ===================== I18N: RU / TJ / EN ===================== */
+const I18N = {
+ru:{
+  app_name:'МОЙ БЮДЖЕТ', app_tag:'Управляй деньгами. Планируй будущее.',
+  tab_login:'Вход', tab_reg:'Регистрация',
+  f_phone:'Телефон', f_phone_req:'Телефон *', f_pass:'Пароль', f_forgot:'Забыли пароль?',
+  f_first:'Имя *', f_last:'Фамилия *', f_middle:'Отчество', f_birth:'Дата рождения', f_gender:'Пол',
+  f_gender_m:'Мужской', f_gender_f:'Женский', f_pass_hint:'Пароль * (мин. 6 символов)',
+  btn_login:'ВОЙТИ', btn_create:'СОЗДАТЬ АККАУНТ', btn_continue:'ПРОДОЛЖИТЬ', btn_confirm_create:'ПОДТВЕРДИТЬ И СОЗДАТЬ АККАУНТ',
+  reg_consent:'Регистрируясь, вы принимаете условия использования и политику конфиденциальности.',
+  otp_title:'Подтверждение номера', otp_hint:'Нажмите «Получить код» — откроется Telegram, и бот пришлёт вам код авторизации.',
+  f_code:'Код авторизации', btn_get_code:'📲 ПОЛУЧИТЬ КОД В TELEGRAM', btn_change_data:'‹ Изменить данные',
+  err_enter_phone:'Сначала введите номер телефона', err_name:'Укажите имя и фамилию',
+  err_phone:'Проверьте номер телефона', err_pass:'Пароль — минимум 6 символов',
+  cp_title:'Выберите страну', cp_search:'Поиск страны или кода…',
+  ob_skip:'Пропустить', ob_next:'ДАЛЕЕ', ob_start:'НАЧАТЬ',
+  ob1_h:'Контролируйте деньги', ob1_p:'Знайте, сколько у вас осталось.',
+  ob2_h:'Не забывайте платежи', ob2_p:'Получайте напоминания о важных расходах.',
+  ob3_h:'Достигайте целей', ob3_p:'Планируйте накопления.',
+  ob4_h:'Ваш AI-помощник', ob4_p:'Получайте анализ своих расходов.',
+  st_sub:'Настроим ваш бюджет за 3 шага', st_next:'ДАЛЕЕ', st_done:'ГОТОВО', st_back:'Назад', st_skip:'Пропустить настройку',
+  st1_h:'Какая у вас зарплата?', st1_amount:'Сумма', st1_currency:'Валюта',
+  st2_h:'Когда вы получаете зарплату?', st2_freq:'Периодичность', st2_day:'Число месяца',
+  st2_monthly:'Каждый месяц', st2_weekly:'Каждую неделю', st2_none:'Нерегулярно',
+  st3_h:'Есть обязательные платежи?', st3_p:'Квартира, интернет, кредит — добавим напоминания.', st3_add:'＋ Добавить платёж',
+  nav_home:'Главная', nav_analytics:'Аналитика', nav_goals:'Цели', nav_profile:'Профиль',
+  greet_night:'Доброй ночи', greet_morning:'Доброе утро', greet_day:'Добрый день', greet_evening:'Добрый вечер',
+  bal_title:'МОЙ БАЛАНС', bal_income:'ДОХОД', bal_expense:'РАСХОД',
+  goal_title:'🎯 Цель', goal_none:'Создайте первую финансовую цель.', goal_create:'＋ Создать цель',
+  pay_title:'🔔 Ближайший платёж', pay_none:'Ближайших платежей нет 🎉', pay_paid:'ОПЛАЧЕНО',
+  tx_title:'Последние операции', tx_all:'Все', tx_empty:'Здесь пока нет расходов.', tx_add_first:'＋ Добавить первый расход',
+  add_expense:'＋ Добавить расход',
+  save:'СОХРАНИТЬ', cancel:'Отмена', delete:'Удалить', add:'Добавить', edit:'Изменить', back:'Назад',
+  saved_ok:'Сохранено ✓', deleted:'Удалено',
+  ai_ph:'Спросите о своих финансах…',
+  lang_title:'Язык', lang_ru:'Русский', lang_tg:'Тоҷикӣ', lang_en:'English',
+},
+tg:{
+  app_name:'БУҶАИ МАН', app_tag:'Пулатонро идора кунед. Ояндаро нақша кунед.',
+  tab_login:'Воридшавӣ', tab_reg:'Бақайдгирӣ',
+  f_phone:'Телефон', f_phone_req:'Телефон *', f_pass:'Рамз', f_forgot:'Рамзро фаромӯш кардед?',
+  f_first:'Ном *', f_last:'Насаб *', f_middle:'Номи падар', f_birth:'Санаи таваллуд', f_gender:'Ҷинс',
+  f_gender_m:'Мард', f_gender_f:'Зан', f_pass_hint:'Рамз * (ҳадди ақал 6 аломат)',
+  btn_login:'ВОРИД ШАВЕД', btn_create:'ҲИСОБ СОЗЕД', btn_continue:'ДАВОМ ДИҲЕД', btn_confirm_create:'ТАСДИҚ ВА СОХТАНИ ҲИСОБ',
+  reg_consent:'Бо бақайдгирӣ шумо шартҳои истифода ва сиёсати махфиятро қабул мекунед.',
+  otp_title:'Тасдиқи рақам', otp_hint:'Тугмаи «Гирифтани код»-ро пахш кунед — Telegram кушода мешавад ва бот кодро мефиристад.',
+  f_code:'Коди тасдиқ', btn_get_code:'📲 ГИРИФТАНИ КОД ДАР TELEGRAM', btn_change_data:'‹ Тағир додани маълумот',
+  err_enter_phone:'Аввал рақами телефонро ворид кунед', err_name:'Ном ва насабро ворид кунед',
+  err_phone:'Рақами телефонро тафтиш кунед', err_pass:'Рамз — ҳадди ақал 6 аломат',
+  cp_title:'Кишварро интихоб кунед', cp_search:'Ҷустуҷӯи кишвар ё код…',
+  ob_skip:'Гузаштан', ob_next:'БАЪДӢ', ob_start:'САР КАРДАН',
+  ob1_h:'Пулатонро назорат кунед', ob1_p:'Донед, ки чанд пул боқӣ мондааст.',
+  ob2_h:'Пардохтҳоро фаромӯш накунед', ob2_p:'Дар бораи хароҳоти муҳим ёдоварӣ гиред.',
+  ob3_h:'Ба ҳадафҳо бирасед', ob3_p:'Ҷамъоварии пулро нақша кунед.',
+  ob4_h:'Ёрдамчии AI-и шумо', ob4_p:'Таҳлили хароҷоти худро гиред.',
+  st_sub:'Буҷаи шуморо дар 3 қадам танзим мекунем', st_next:'БАЪДӢ', st_done:'ТАЙЁР', st_back:'Бозгашт', st_skip:'Танзимро гузаштан',
+  st1_h:'Маоши шумо чанд аст?', st1_amount:'Маблағ', st1_currency:'Асъор',
+  st2_h:'Кай маош мегиред?', st2_freq:'Даврагӣ', st2_day:'Рӯзи моҳ',
+  st2_monthly:'Ҳар моҳ', st2_weekly:'Ҳар ҳафта', st2_none:'Бетартиб',
+  st3_h:'Пардохтҳои ҳатмӣ ҳастанд?', st3_p:'Хона, интернет, қарз — ёдоварӣ илова мекунем.', st3_add:'＋ Иловаи пардохт',
+  nav_home:'Асосӣ', nav_analytics:'Таҳлил', nav_goals:'Ҳадафҳо', nav_profile:'Профил',
+  greet_night:'Шаби хуш', greet_morning:'Субҳ ба хайр', greet_day:'Рӯз ба хайр', greet_evening:'Бегоҳ ба хайр',
+  bal_title:'БОЛАНСИ МАН', bal_income:'ДАРОМАД', bal_expense:'ХАРОҶОТ',
+  goal_title:'🎯 Ҳадаф', goal_none:'Ҳадафи молиявии аввалинро созед.', goal_create:'＋ Сохтани ҳадаф',
+  pay_title:'🔔 Пардохти наздик', pay_none:'Пардохти наздик нест 🎉', pay_paid:'ПАРДОХТ ШУД',
+  tx_title:'Амалиётҳои охирин', tx_all:'Ҳама', tx_empty:'Дар ин ҷо ҳанӯз хароҷот нест.', tx_add_first:'＋ Иловаи хароҷоти аввалин',
+  add_expense:'＋ Иловаи хароҷот',
+  save:'НИГОҲ ДОШТАН', cancel:'Бекор', delete:'Нест кардан', add:'Илова', edit:'Тағир', back:'Бозгашт',
+  saved_ok:'Нигоҳ дошта шуд ✓', deleted:'Нест карда шуд',
+  ai_ph:'Дар бораи молияи худ савол диҳед…',
+  lang_title:'Забон', lang_ru:'Русӣ', lang_tg:'Тоҷикӣ', lang_en:'Англисӣ',
+},
+en:{
+  app_name:'MY BUDGET', app_tag:'Manage your money. Plan your future.',
+  tab_login:'Sign in', tab_reg:'Sign up',
+  f_phone:'Phone', f_phone_req:'Phone *', f_pass:'Password', f_forgot:'Forgot password?',
+  f_first:'First name *', f_last:'Last name *', f_middle:'Middle name', f_birth:'Date of birth', f_gender:'Gender',
+  f_gender_m:'Male', f_gender_f:'Female', f_pass_hint:'Password * (min. 6 characters)',
+  btn_login:'SIGN IN', btn_create:'CREATE ACCOUNT', btn_continue:'CONTINUE', btn_confirm_create:'CONFIRM & CREATE ACCOUNT',
+  reg_consent:'By signing up you accept the Terms of Use and Privacy Policy.',
+  otp_title:'Phone verification', otp_hint:'Tap "Get code" — Telegram will open and the bot will send you a code.',
+  f_code:'Verification code', btn_get_code:'📲 GET CODE IN TELEGRAM', btn_change_data:'‹ Edit details',
+  err_enter_phone:'Enter your phone number first', err_name:'Enter your first and last name',
+  err_phone:'Check your phone number', err_pass:'Password must be at least 6 characters',
+  cp_title:'Select a country', cp_search:'Search country or code…',
+  ob_skip:'Skip', ob_next:'NEXT', ob_start:'GET STARTED',
+  ob1_h:'Control your money', ob1_p:'Know exactly how much you have left.',
+  ob2_h:"Don't miss payments", ob2_p:'Get reminders about important expenses.',
+  ob3_h:'Reach your goals', ob3_p:'Plan your savings.',
+  ob4_h:'Your AI assistant', ob4_p:'Get insights on your spending.',
+  st_sub:"Let's set up your budget in 3 steps", st_next:'NEXT', st_done:'DONE', st_back:'Back', st_skip:'Skip setup',
+  st1_h:"What's your salary?", st1_amount:'Amount', st1_currency:'Currency',
+  st2_h:'When do you get paid?', st2_freq:'Frequency', st2_day:'Day of month',
+  st2_monthly:'Every month', st2_weekly:'Every week', st2_none:'Irregular',
+  st3_h:'Any required payments?', st3_p:"Rent, internet, loan — we'll add reminders.", st3_add:'＋ Add payment',
+  nav_home:'Home', nav_analytics:'Analytics', nav_goals:'Goals', nav_profile:'Profile',
+  greet_night:'Good night', greet_morning:'Good morning', greet_day:'Good afternoon', greet_evening:'Good evening',
+  bal_title:'MY BALANCE', bal_income:'INCOME', bal_expense:'EXPENSE',
+  goal_title:'🎯 Goal', goal_none:'Create your first financial goal.', goal_create:'＋ Create goal',
+  pay_title:'🔔 Upcoming payment', pay_none:'No upcoming payments 🎉', pay_paid:'PAID',
+  tx_title:'Recent transactions', tx_all:'All', tx_empty:'No expenses yet.', tx_add_first:'＋ Add first expense',
+  add_expense:'＋ Add expense',
+  save:'SAVE', cancel:'Cancel', delete:'Delete', add:'Add', edit:'Edit', back:'Back',
+  saved_ok:'Saved ✓', deleted:'Deleted',
+  ai_ph:'Ask about your finances…',
+  lang_title:'Language', lang_ru:'Russian', lang_tg:'Tajik', lang_en:'English',
+}
+};
+function tr(k){ const l=Lang.cur(); return (I18N[l]&&I18N[l][k]!=null) ? I18N[l][k] : (I18N.ru[k]!=null?I18N.ru[k]:k); }
+const Lang = {
+  cur(){ return localStorage.mb_lang || 'ru'; },
+  set(l){ localStorage.mb_lang=l; if(S.uid) db.ref('users/'+S.uid+'/profile/lang').set(l); Lang.apply(); Nav.render(); },
+  apply(){
+    document.documentElement.lang = Lang.cur();
+    document.querySelectorAll('[data-i18n]').forEach(el=>{ const k=el.dataset.i18n; el.textContent=tr(k); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ const k=el.dataset.i18nPh; el.placeholder=tr(k); });
+  }
+};
+
+/* ===================== ВЫБОР КОДА СТРАНЫ ДЛЯ ТЕЛЕФОНА ===================== */
+const COUNTRIES = [
+ {c:'TJ',d:'992',e:'🇹🇯',n:{ru:'Таджикистан',tg:'Тоҷикистон',en:'Tajikistan'}},
+ {c:'RU',d:'7', e:'🇷🇺',n:{ru:'Россия',tg:'Русия',en:'Russia'}},
+ {c:'UZ',d:'998',e:'🇺🇿',n:{ru:'Узбекистан',tg:'Ӯзбекистон',en:'Uzbekistan'}},
+ {c:'KG',d:'996',e:'🇰🇬',n:{ru:'Киргизия',tg:'Қирғизистон',en:'Kyrgyzstan'}},
+ {c:'KZ',d:'7', e:'🇰🇿',n:{ru:'Казахстан',tg:'Қазоқистон',en:'Kazakhstan'}},
+ {c:'TM',d:'993',e:'🇹🇲',n:{ru:'Туркменистан',tg:'Туркманистон',en:'Turkmenistan'}},
+ {c:'AF',d:'93', e:'🇦🇫',n:{ru:'Афганистан',tg:'Афғонистон',en:'Afghanistan'}},
+ {c:'AZ',d:'994',e:'🇦🇿',n:{ru:'Азербайджан',tg:'Озарбойҷон',en:'Azerbaijan'}},
+ {c:'AM',d:'374',e:'🇦🇲',n:{ru:'Армения',tg:'Арманистон',en:'Armenia'}},
+ {c:'GE',d:'995',e:'🇬🇪',n:{ru:'Грузия',tg:'Гурҷистон',en:'Georgia'}},
+ {c:'BY',d:'375',e:'🇧🇾',n:{ru:'Беларусь',en:'Belarus'}},
+ {c:'UA',d:'380',e:'🇺🇦',n:{ru:'Украина',en:'Ukraine'}},
+ {c:'MD',d:'373',e:'🇲🇩',n:{ru:'Молдова',en:'Moldova'}},
+ {c:'TR',d:'90', e:'🇹🇷',n:{ru:'Турция',tg:'Туркия',en:'Turkey'}},
+ {c:'IR',d:'98', e:'🇮🇷',n:{ru:'Иран',tg:'Эрон',en:'Iran'}},
+ {c:'PK',d:'92', e:'🇵🇰',n:{ru:'Пакистан',en:'Pakistan'}},
+ {c:'IN',d:'91', e:'🇮🇳',n:{ru:'Индия',en:'India'}},
+ {c:'CN',d:'86', e:'🇨🇳',n:{ru:'Китай',tg:'Хитой',en:'China'}},
+ {c:'AE',d:'971',e:'🇦🇪',n:{ru:'ОАЭ',en:'UAE'}},
+ {c:'SA',d:'966',e:'🇸🇦',n:{ru:'Саудовская Аравия',en:'Saudi Arabia'}},
+ {c:'QA',d:'974',e:'🇶🇦',n:{ru:'Катар',en:'Qatar'}},
+ {c:'KW',d:'965',e:'🇰🇼',n:{ru:'Кувейт',en:'Kuwait'}},
+ {c:'BH',d:'973',e:'🇧🇭',n:{ru:'Бахрейн',en:'Bahrain'}},
+ {c:'OM',d:'968',e:'🇴🇲',n:{ru:'Оман',en:'Oman'}},
+ {c:'JO',d:'962',e:'🇯🇴',n:{ru:'Иордания',en:'Jordan'}},
+ {c:'LB',d:'961',e:'🇱🇧',n:{ru:'Ливан',en:'Lebanon'}},
+ {c:'IL',d:'972',e:'🇮🇱',n:{ru:'Израиль',en:'Israel'}},
+ {c:'EG',d:'20', e:'🇪🇬',n:{ru:'Египет',en:'Egypt'}},
+ {c:'DE',d:'49', e:'🇩🇪',n:{ru:'Германия',en:'Germany'}},
+ {c:'FR',d:'33', e:'🇫🇷',n:{ru:'Франция',en:'France'}},
+ {c:'GB',d:'44', e:'🇬🇧',n:{ru:'Великобритания',en:'United Kingdom'}},
+ {c:'IT',d:'39', e:'🇮🇹',n:{ru:'Италия',en:'Italy'}},
+ {c:'ES',d:'34', e:'🇪🇸',n:{ru:'Испания',en:'Spain'}},
+ {c:'PT',d:'351',e:'🇵🇹',n:{ru:'Португалия',en:'Portugal'}},
+ {c:'NL',d:'31', e:'🇳🇱',n:{ru:'Нидерланды',en:'Netherlands'}},
+ {c:'BE',d:'32', e:'🇧🇪',n:{ru:'Бельгия',en:'Belgium'}},
+ {c:'CH',d:'41', e:'🇨🇭',n:{ru:'Швейцария',en:'Switzerland'}},
+ {c:'AT',d:'43', e:'🇦🇹',n:{ru:'Австрия',en:'Austria'}},
+ {c:'SE',d:'46', e:'🇸🇪',n:{ru:'Швеция',en:'Sweden'}},
+ {c:'NO',d:'47', e:'🇳🇴',n:{ru:'Норвегия',en:'Norway'}},
+ {c:'FI',d:'358',e:'🇫🇮',n:{ru:'Финляндия',en:'Finland'}},
+ {c:'PL',d:'48', e:'🇵🇱',n:{ru:'Польша',en:'Poland'}},
+ {c:'CZ',d:'420',e:'🇨🇿',n:{ru:'Чехия',en:'Czech Republic'}},
+ {c:'GR',d:'30', e:'🇬🇷',n:{ru:'Греция',en:'Greece'}},
+ {c:'RO',d:'40', e:'🇷🇴',n:{ru:'Румыния',en:'Romania'}},
+ {c:'HU',d:'36', e:'🇭🇺',n:{ru:'Венгрия',en:'Hungary'}},
+ {c:'US',d:'1',  e:'🇺🇸',n:{ru:'США',tg:'ИМА',en:'United States'}},
+ {c:'CA',d:'1',  e:'🇨🇦',n:{ru:'Канада',en:'Canada'}},
+ {c:'BR',d:'55', e:'🇧🇷',n:{ru:'Бразилия',en:'Brazil'}},
+ {c:'MX',d:'52', e:'🇲🇽',n:{ru:'Мексика',en:'Mexico'}},
+ {c:'KR',d:'82', e:'🇰🇷',n:{ru:'Южная Корея',en:'South Korea'}},
+ {c:'JP',d:'81', e:'🇯🇵',n:{ru:'Япония',tg:'Ҷопон',en:'Japan'}},
+ {c:'VN',d:'84', e:'🇻🇳',n:{ru:'Вьетнам',en:'Vietnam'}},
+ {c:'TH',d:'66', e:'🇹🇭',n:{ru:'Таиланд',en:'Thailand'}},
+ {c:'ID',d:'62', e:'🇮🇩',n:{ru:'Индонезия',en:'Indonesia'}},
+ {c:'MY',d:'60', e:'🇲🇾',n:{ru:'Малайзия',en:'Malaysia'}},
+ {c:'PH',d:'63', e:'🇵🇭',n:{ru:'Филиппины',en:'Philippines'}},
+ {c:'SG',d:'65', e:'🇸🇬',n:{ru:'Сингапур',en:'Singapore'}},
+ {c:'AU',d:'61', e:'🇦🇺',n:{ru:'Австралия',en:'Australia'}},
+ {c:'ZA',d:'27', e:'🇿🇦',n:{ru:'Южная Африка',en:'South Africa'}}
+];
+function coName(co){ return co.n[Lang.cur()] || co.n.ru; }
+const CP = {
+  sel:{lgPhone:'TJ', rgPhone:'TJ'},
+  q:'',
+  open(id){ CP.target=id; CP.q=''; Sheet.open(CP.render()); setTimeout(()=>{ const el=$('cpSearch'); if(el) el.focus(); },100); },
+  render(){
+    const q=CP.q.toLowerCase();
+    const list = COUNTRIES.filter(c=> !q || coName(c).toLowerCase().includes(q) || c.d.includes(q) || c.c.toLowerCase().includes(q));
+    return `<h3>${tr('cp_title')}</h3>
+      <input class="inp" id="cpSearch" placeholder="${tr('cp_search')}" oninput="CP.q=this.value;CP.refresh()" style="margin-bottom:10px">
+      <div id="cpList" style="max-height:50vh;overflow-y:auto">${CP.list(list)}</div>`;
+  },
+  list(list){
+    return list.map(c=>`<div class="list-item" onclick="CP.pick('${c.c}')">
+      <span style="font-size:22px">${c.e}</span>
+      <span class="grow" style="font-weight:600;font-size:14px">${esc(coName(c))}</span>
+      <span class="mut amount">+${c.d}</span></div>`).join('') ||
+      `<div class="empty" style="padding:24px"><div class="e-ico">🔎</div>${tr('cp_search')}</div>`;
+  },
+  refresh(){ const q=CP.q.toLowerCase();
+    const list = COUNTRIES.filter(c=> !q || coName(c).toLowerCase().includes(q) || c.d.includes(q) || c.c.toLowerCase().includes(q));
+    $('cpList').innerHTML = CP.list(list); },
+  pick(code){
+    const id = CP.target, co = COUNTRIES.find(x=>x.c===code); if(!co) return;
+    CP.sel[id] = code;
+    const pfx = id==='lgPhone' ? 'lgCode' : 'rgCode';
+    $(pfx+'Flag').textContent = co.e; $(pfx+'Val').textContent = '+'+co.d;
+    Sheet.close();
+  },
+  full(id){ const co = COUNTRIES.find(x=>x.c===CP.sel[id]) || COUNTRIES[0];
+    return '+'+co.d+' '+($(id).value||'').trim(); }
+};
+Lang.apply();
+
 /* ===================== ONBOARDING ===================== */
 const OB = [
-  {e:'💰',h:'Контролируйте деньги',p:'Знайте, сколько у вас осталось.'},
-  {e:'🔔',h:'Не забывайте платежи',p:'Получайте напоминания о важных расходах.'},
-  {e:'🎯',h:'Достигайте целей',p:'Планируйте накопления.'},
-  {e:'🤖',h:'Ваш AI-помощник',p:'Получайте анализ своих расходов.'}
+  {e:'💰',hk:'ob1_h',pk:'ob1_p'},
+  {e:'🔔',hk:'ob2_h',pk:'ob2_p'},
+  {e:'🎯',hk:'ob3_h',pk:'ob3_p'},
+  {e:'🤖',hk:'ob4_h',pk:'ob4_p'}
 ];
 const Onb = {
   i:0,
   start(){ Onb.i=0; show('onboarding'); Onb.render(); },
   render(){ const s=OB[Onb.i]; $('obE').textContent=s.e; $('obE').style.animation='none'; void $('obE').offsetWidth; $('obE').style.animation='';
-    $('obH').textContent=s.h; $('obP').textContent=s.p;
+    $('obH').textContent=tr(s.hk); $('obP').textContent=tr(s.pk);
     $('obDots').innerHTML = OB.map((_,i)=>`<i class="${i===Onb.i?'on':''}"></i>`).join('');
-    $('obBtn').textContent = Onb.i===OB.length-1?'НАЧАТЬ':'ДАЛЕЕ'; },
+    $('obBtn').textContent = Onb.i===OB.length-1?tr('ob_start'):tr('ob_next'); },
   next(){ haptic(); if(Onb.i<OB.length-1){ Onb.i++; Onb.render(); } else Onb.finish(); },
-  finish(){ localStorage.mb_onb='1'; show('auth'); }
+  finish(){ localStorage.mb_onb='1'; show('auth'); Lang.apply(); }
 };
 
 /* ===================== AUTH ===================== */
@@ -702,8 +937,8 @@ const Auth = {
   async login(ev){
     ev.preventDefault(); const b=$('lgBtn'); b.disabled=true; b.textContent='ВХОД…';
     try{
-      const phone = $('lgPhone').value.trim();
-      if(phoneKey(phone).length<6) throw {code:'invalid-email'};
+      const phone = CP.full('lgPhone');
+      if(phoneKey($('lgPhone').value).length<5) throw {code:'invalid-email'};
       await auth.signInWithEmailAndPassword(Auth.mail(phone), $('lgPass').value);
     }catch(e){ toast(Auth.err(e),'err'); }
     b.disabled=false; b.textContent='ВОЙТИ';
@@ -717,9 +952,9 @@ const Auth = {
     if(ev&&ev.preventDefault) ev.preventDefault();
     if(!OTP.verify()) return;
     const b=$('rgBtn'); b.disabled=true; b.textContent='СОЗДАЁМ…';
-    const phone = $('rgPhone').value.trim();
+    const phone = CP.full('rgPhone');
     try{
-      if(phoneKey(phone).length<6) throw {code:'invalid-email'};
+      if(phoneKey($('rgPhone').value).length<5) throw {code:'invalid-email'};
       const cred = await auth.createUserWithEmailAndPassword(Auth.mail(phone), $('rgPass').value);
       const p = {
         firstName:$('rgFirst').value.trim(), lastName:$('rgLast').value.trim(),
@@ -735,17 +970,19 @@ const Auth = {
       };
       if(TG_BOT.BOT_TOKEN) payload.telegram = {
         bot:{token:TG_BOT.BOT_TOKEN,username:TG_BOT.BOT_USERNAME,savedAt:Date.now()},
-        chatId: OTP.chat || TG_BOT.ADMIN_CHAT_ID || null,
+        chatId: OTP.chat || null,
+        username: OTP.chatUsername || null,
         connectedAt: OTP.chat?Date.now():null
       };
       await db.ref('users/'+cred.user.uid).set(payload);
+      if(!OTP.chat) toast('Аккаунт создан ✓. Чтобы получать уведомления в Telegram — привяжите бота в Настройках → Telegram.','ok');
       OTP.reset();
     }catch(e){ toast(Auth.err(e),'err'); }
     b.disabled=false; b.textContent='СОЗДАТЬ АККАУНТ';
   },
   async reset(){
-    const phone = $('lgPhone').value.trim();
-    if(phoneKey(phone).length<6) return toast('Сначала введите номер телефона','err');
+    const phone = CP.full('lgPhone');
+    if(phoneKey($('lgPhone').value).length<5) return toast(tr('err_enter_phone'),'err');
     Sheet.open(`<h3>Восстановление пароля</h3>
       <p class="mut" style="margin:0 0 16px;font-size:14px">Аккаунт привязан к номеру телефона. Для сброса пароля обратитесь в поддержку или войдите с другого устройства, где сессия активна.</p>
       <button class="btn ghost" onclick="Sheet.close()">Понятно</button>`);
@@ -756,8 +993,8 @@ const Auth = {
 
 /* ===================== OTP ЧЕРЕЗ TELEGRAM ===================== */
 const OTP = {
-  step:1, code:null, exp:0, tries:0, chat:null, poller:null, offset:0, cooldown:0, timer:null,
-  reset(){ OTP.step=1; OTP.code=null; OTP.chat=null; OTP.tries=0; OTP.stopPoll(); clearInterval(OTP.timer);
+  step:1, code:null, exp:0, tries:0, chat:null, chatUsername:null, poller:null, offset:0, cooldown:0, timer:null,
+  reset(){ OTP.step=1; OTP.code=null; OTP.chat=null; OTP.chatUsername=null; OTP.tries=0; OTP.stopPoll(); clearInterval(OTP.timer);
     const s1=$('regStep1'), s2=$('regStep2'), n=$('rgNext');
     if(s1){ s1.classList.remove('hide'); s2.classList.add('hide'); n.classList.remove('hide'); }
     if($('rgCode')) $('rgCode').value=''; },
@@ -766,9 +1003,9 @@ const OTP = {
   next(){
     const f=$('rgFirst').value.trim(), l=$('rgLast').value.trim(),
           ph=$('rgPhone').value.trim(), pw=$('rgPass').value;
-    if(!f||!l) return toast('Укажите имя и фамилию','err');
-    if(phoneKey(ph).length<6) return toast('Проверьте номер телефона','err');
-    if((pw||'').length<6) return toast('Пароль — минимум 6 символов','err');
+    if(!f||!l) return toast(tr('err_name'),'err');
+    if(phoneKey(ph).length<5) return toast(tr('err_phone'),'err');
+    if((pw||'').length<6) return toast(tr('err_pass'),'err');
     OTP.step=2;
     $('regStep1').classList.add('hide'); $('regStep2').classList.remove('hide'); $('rgNext').classList.add('hide');
     window.scrollTo(0,0);
@@ -837,6 +1074,7 @@ const OTP = {
           if(!/^\/start/i.test(m.text.trim())) continue;
           if(String(m.chat.id)===String(TG_BOT.ADMIN_CHAT_ID)) continue;
           OTP.chat = String(m.chat.id);
+          OTP.chatUsername = m.chat.username || null;
           await OTP.api('sendMessage',{chat_id:OTP.chat,text:text});
           $('rgCodeHint').textContent='Код отправлен вам в Telegram ✓';
           toast('Код отправлен в Telegram ✓','ok');
@@ -871,7 +1109,7 @@ const Setup = {
     [1,2,3].forEach(i=>$('st'+i).classList.toggle('hide',i!==Setup.step));
     $('stDots').innerHTML=[1,2,3].map(i=>`<i class="${i===Setup.step?'on':''}"></i>`).join('');
     $('stBack').classList.toggle('hide',Setup.step===1);
-    $('stNext').textContent = Setup.step===3?'ГОТОВО':'ДАЛЕЕ';
+    $('stNext').textContent = Setup.step===3?tr('st_done'):tr('st_next');
     Setup.renderPayments();
   },
   renderPayments(){
@@ -1045,7 +1283,7 @@ function budgetState(){
 const Home = {
   render(){
     const p=S.data.profile||{}, h=new Date().getHours();
-    const greet = h<5?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер';
+    const greet = h<5?tr('greet_night'):h<12?tr('greet_morning'):h<18?tr('greet_day'):tr('greet_evening');
     $('hGreet').textContent='👋 '+greet; $('hName').textContent=(p.firstName||'')+' '+(p.lastName||'');
     const ini=((p.firstName||'?')[0]||'?')+((p.lastName||'')[0]||'');
     $('hAvatar').textContent=ini.toUpperCase(); $('pAvatar').textContent=ini.toUpperCase();
@@ -1507,6 +1745,7 @@ const Profile = {
         ${item('💬','Telegram', tg.chatId?'подключён':'не подключён','Sub.telegram()')}
         ${item('🔔','Уведомления', st.notifications===false?'выкл':'вкл','Sub.notif()')}
         ${item('🌙','Тема', ({light:'Светлая',dark:'Тёмная',system:'Системная'})[localStorage.mb_theme||'system'],'Sub.theme()')}
+        ${item('🌐',tr('lang_title'), ({ru:tr('lang_ru'),tg:tr('lang_tg'),en:tr('lang_en')})[Lang.cur()],'Sub.language()')}
         ${item('🔒','Безопасность', sec.pinEnabled?'PIN включён':'выкл','Sub.security()')}
         ${item('📊','Экспорт данных','','Sub.export()')}
       </div>
@@ -1679,6 +1918,11 @@ const Sub = {
     subShell('🌙 Тема',`<div class="card" style="padding:6px 18px">${[['light','☀️','Светлая'],['dark','🌙','Тёмная'],['system','⚙️','Как в системе']].map(([k,e,n])=>`
       <div class="list-item" onclick="Theme.set('${k}');Sub.theme()"><div class="ico">${e}</div><div class="grow" style="font-weight:600">${n}</div>
       ${(localStorage.mb_theme||'system')===k?'<span style="color:var(--accent)">✓</span>':''}</div>`).join('')}</div>`);
+  },
+  language(){
+    subShell('🌐 '+tr('lang_title'),`<div class="card" style="padding:6px 18px">${[['ru','🇷🇺',tr('lang_ru')],['tg','🇹🇯',tr('lang_tg')],['en','🇬🇧',tr('lang_en')]].map(([k,e,n])=>`
+      <div class="list-item" onclick="Lang.set('${k}');Sub.language()"><div class="ico">${e}</div><div class="grow" style="font-weight:600">${n}</div>
+      ${Lang.cur()===k?'<span style="color:var(--accent)">✓</span>':''}</div>`).join('')}</div>`);
   },
   security(){
     const sec=(S.data&&S.data.security)||{};
@@ -2094,6 +2338,7 @@ auth.onAuthStateChanged(async user=>{
       await db.ref('users/'+user.uid+'/profile').set(S.data.profile);
     }
     Theme.apply(S.data.profile.theme);
+    if(S.data.profile.lang && S.data.profile.lang!==localStorage.mb_lang){ localStorage.mb_lang=S.data.profile.lang; Lang.apply(); }
     if(!S.data.profile.onboarded){ Setup.start(); S.booted=true; return; }
     await ensureIncome();
     const sec=S.data.security||{};
@@ -2104,7 +2349,10 @@ auth.onAuthStateChanged(async user=>{
     if(first){ setTimeout(Notify.check,1200); setTimeout(TG.notifyPayments,2500); }
     S.booted=true;
   }, err=>{
+    console.error('DB error:', err);
     toast('Нет доступа к базе данных. Проверьте правила Firebase.','err');
+    S.booted = true;
+    auth.signOut();
   });
 });
 
