@@ -1,0 +1,2083 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0E11">
+<title>МОЙ БЮДЖЕТ</title>
+<style>
+/* ===================== DESIGN SYSTEM ===================== */
+:root{
+  --accent:#00D09C; --accent-soft:rgba(0,208,156,.14); --accent-press:#00b98a;
+  --ok:#22C55E; --warn:#F5A524; --err:#F0435A;
+  --r-card:24px; --r-sm:14px; --r-pill:999px;
+  --t:200ms cubic-bezier(.22,1,.36,1);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+}
+html[data-theme="light"]{
+  --bg:#F4F6F8; --bg2:#ffffff; --card:#ffffff; --card2:#F7F9FA;
+  --txt:#0D1418; --txt2:#5C6B73; --txt3:#93A1A8;
+  --line:rgba(13,20,24,.08); --shadow:0 4px 24px rgba(13,20,24,.06);
+  --glass:rgba(255,255,255,.82); --nav:rgba(255,255,255,.9);
+}
+html[data-theme="dark"]{
+  --bg:#0B0E11; --bg2:#12171C; --card:#141A20; --card2:#1B2229;
+  --txt:#EDF2F5; --txt2:#95A4AE; --txt3:#657582;
+  --line:rgba(255,255,255,.08); --shadow:0 8px 32px rgba(0,0,0,.45);
+  --glass:rgba(20,26,32,.75); --nav:rgba(12,16,20,.82);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--bg);color:var(--txt);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;transition:background var(--t),color var(--t);
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+input,select,textarea{outline:none}
+::-webkit-scrollbar{width:0;height:0}
+.hide{display:none!important}
+
+/* ===================== LAYOUT ===================== */
+#root{max-width:520px;margin:0 auto;min-height:100%;position:relative}
+.screen{display:none;min-height:100vh;min-height:100dvh}
+.screen.active{display:block;animation:fade var(--t)}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pad{padding:0 18px}
+.view{display:none;padding:0 18px calc(120px + var(--safe-b));animation:fade 240ms}
+.view.active{display:block}
+
+/* ===================== SPLASH ===================== */
+#splash{display:none;align-items:center;justify-content:center;background:var(--bg);
+  position:fixed;inset:0;z-index:100;flex-direction:column;gap:14px}
+#splash.active{display:flex}
+.splash-logo{width:88px;height:88px;border-radius:26px;display:grid;place-items:center;font-size:42px;
+  background:linear-gradient(145deg,var(--accent),#00a97f);box-shadow:0 18px 44px rgba(0,208,156,.35);
+  animation:pop 900ms cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.splash-title{font-size:26px;font-weight:800;letter-spacing:.5px;animation:up 700ms 200ms backwards}
+.splash-sub{color:var(--txt2);font-size:14px;animation:up 700ms 380ms backwards}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.splash-bar{width:120px;height:3px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:10px}
+.splash-bar i{display:block;height:100%;width:40%;background:var(--accent);border-radius:9px;animation:load 1.4s ease-in-out infinite}
+@keyframes load{0%{margin-left:-40%}100%{margin-left:100%}}
+
+/* ===================== ONBOARDING ===================== */
+#onboarding{display:none;flex-direction:column;height:100vh;height:100dvh;padding:calc(20px + var(--safe-t)) 22px calc(28px + var(--safe-b))}
+#onboarding.active{display:flex}
+.ob-skip{align-self:flex-end;color:var(--txt2);font-size:14px;padding:8px}
+.ob-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px}
+.ob-emoji{font-size:74px;animation:pop 600ms}
+.ob-h{font-size:25px;font-weight:800;margin:0}
+.ob-p{color:var(--txt2);margin:0;max-width:300px;font-size:15.5px}
+.dots{display:flex;gap:7px;justify-content:center;margin-bottom:18px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:var(--t)}
+.dots i.on{width:22px;background:var(--accent);border-radius:9px}
+
+/* ===================== COMPONENTS ===================== */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:54px;border-radius:var(--r-pill);
+  background:var(--accent);color:#04120D;font-weight:700;font-size:16px;width:100%;transition:var(--t)}
+.btn:active{transform:scale(.975);background:var(--accent-press)}
+.btn.ghost{background:var(--card);color:var(--txt);border:1px solid var(--line)}
+.btn.soft{background:var(--accent-soft);color:var(--accent)}
+.btn.danger{background:rgba(240,67,90,.14);color:var(--err)}
+.btn.sm{height:44px;font-size:14.5px;width:auto;padding:0 18px}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.card{background:var(--card);border-radius:var(--r-card);padding:18px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.card+.card{margin-top:14px}
+.row{display:flex;align-items:center;gap:12px}
+.sp{justify-content:space-between}
+.grow{flex:1;min-width:0}
+.mut{color:var(--txt2)}
+.mut3{color:var(--txt3)}
+.sec-title{font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--txt3);margin:22px 2px 10px}
+.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--txt2);margin:0 0 6px 4px}
+.inp{width:100%;height:52px;border-radius:16px;background:var(--card2);border:1px solid var(--line);
+  padding:0 15px;transition:var(--t)}
+.inp:focus{border-color:var(--accent);background:var(--card)}
+textarea.inp{height:auto;padding:14px 15px;resize:vertical;min-height:80px}
+select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--txt2) 50%),linear-gradient(135deg,var(--txt2) 50%,transparent 50%);
+  background-position:calc(100% - 20px) 23px,calc(100% - 15px) 23px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.chip{padding:9px 14px;border-radius:var(--r-pill);background:var(--card);border:1px solid var(--line);
+  font-size:13.5px;font-weight:600;color:var(--txt2);white-space:nowrap;transition:var(--t)}
+.chip.on{background:var(--accent);color:#04120D;border-color:transparent}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 2px}
+.seg{display:flex;background:var(--card2);border-radius:var(--r-pill);padding:4px;gap:2px;border:1px solid var(--line)}
+.seg button{flex:1;height:38px;border-radius:var(--r-pill);font-size:13.5px;font-weight:600;color:var(--txt2);transition:var(--t)}
+.seg button.on{background:var(--accent);color:#04120D}
+.ico{width:44px;height:44px;border-radius:14px;background:var(--card2);display:grid;place-items:center;font-size:20px;flex:none}
+.badge{font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:var(--r-pill)}
+.b-ok{background:rgba(34,197,94,.15);color:var(--ok)}
+.b-warn{background:rgba(245,165,36,.15);color:var(--warn)}
+.b-err{background:rgba(240,67,90,.15);color:var(--err)}
+.prog{height:9px;border-radius:9px;background:var(--card2);overflow:hidden}
+.prog i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--accent),#57e3bd);transition:width 400ms}
+.prog.warn i{background:linear-gradient(90deg,var(--warn),#ffc971)}
+.prog.err i{background:linear-gradient(90deg,var(--err),#ff7d8f)}
+.amount{font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:-.5px}
+.list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.list-item:last-child{border-bottom:0}
+.empty{text-align:center;padding:38px 20px;color:var(--txt2)}
+.empty .e-ico{font-size:46px;opacity:.55;margin-bottom:8px}
+.skel{background:linear-gradient(90deg,var(--card2) 25%,var(--line) 50%,var(--card2) 75%);
+  background-size:200% 100%;animation:sk 1.2s infinite;border-radius:14px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ===================== HEADER / NAV ===================== */
+.top{position:sticky;top:0;z-index:20;background:var(--glass);backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);padding:calc(12px + var(--safe-t)) 18px 12px;border-bottom:1px solid var(--line)}
+.top h2{margin:0;font-size:20px;font-weight:800}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,var(--accent),#00a97f);
+  color:#04120D;display:grid;place-items:center;font-weight:800;font-size:15px;flex:none}
+.icon-btn{width:40px;height:40px;border-radius:14px;background:var(--card);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:17px;flex:none;transition:var(--t)}
+.icon-btn:active{transform:scale(.92)}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--nav);backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);border-top:1px solid var(--line);
+  padding:8px 6px calc(8px + var(--safe-b));display:flex;max-width:520px;margin:0 auto}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;
+  color:var(--txt3);font-size:10.5px;font-weight:600;transition:var(--t)}
+.nav button .n-i{font-size:21px;line-height:1}
+.nav button.on{color:var(--accent)}
+.nav .fab-slot{position:relative}
+.fab{width:56px;height:56px;border-radius:50%;background:var(--accent);color:#04120D;font-size:28px;
+  display:grid;place-items:center;margin-top:-22px;box-shadow:0 10px 26px rgba(0,208,156,.42);transition:var(--t)}
+.fab:active{transform:scale(.9) rotate(90deg)}
+
+/* ===================== BALANCE ===================== */
+.balance{background:linear-gradient(150deg,#00D09C 0%,#00a97f 55%,#068d6d 100%);
+  border-radius:28px;padding:22px;color:#032B21;position:relative;overflow:hidden;
+  box-shadow:0 16px 40px rgba(0,208,156,.28)}
+.balance:before{content:"";position:absolute;width:190px;height:190px;border-radius:50%;
+  background:rgba(255,255,255,.16);top:-80px;right:-50px}
+.balance:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.1);bottom:-60px;left:-20px}
+.balance .lab{font-size:12px;font-weight:700;letter-spacing:1.2px;opacity:.75;position:relative}
+.balance .big{font-size:38px;margin:6px 0 16px;position:relative;line-height:1.1}
+.balance .io{display:flex;gap:10px;position:relative}
+.balance .io div{flex:1;background:rgba(255,255,255,.2);border-radius:16px;padding:10px 12px}
+.balance .io span{display:block;font-size:11.5px;font-weight:700;opacity:.8}
+.balance .io b{font-size:16px;font-variant-numeric:tabular-nums}
+
+/* ===================== SHEET / MODAL ===================== */
+.sheet-wrap{position:fixed;inset:0;z-index:60;display:none}
+.sheet-wrap.on{display:block}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);animation:fade 200ms}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:var(--bg2);
+  border-radius:28px 28px 0 0;padding:10px 18px calc(24px + var(--safe-b));max-height:92dvh;overflow-y:auto;
+  animation:slideup 260ms cubic-bezier(.22,1,.36,1);border-top:1px solid var(--line)}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:none}}
+.grab{width:42px;height:4px;border-radius:9px;background:var(--line);margin:4px auto 14px}
+.sheet h3{margin:0 0 14px;font-size:19px;font-weight:800}
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cat-cell{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px;border-radius:18px;
+  background:var(--card2);border:1px solid transparent;font-size:10.5px;color:var(--txt2);text-align:center;transition:var(--t)}
+.cat-cell .e{font-size:23px}
+.cat-cell.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+
+/* ===================== KEYPAD / PIN ===================== */
+#lock{display:none;position:fixed;inset:0;z-index:90;background:var(--bg);
+  flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px}
+#lock.active{display:flex}
+.pin-dots{display:flex;gap:14px}
+.pin-dots i{width:14px;height:14px;border-radius:50%;background:var(--card2);border:1.5px solid var(--line);transition:var(--t)}
+.pin-dots i.on{background:var(--accent);border-color:var(--accent);transform:scale(1.12)}
+.keypad{display:grid;grid-template-columns:repeat(3,76px);gap:14px;justify-content:center}
+.keypad button{height:70px;border-radius:50%;background:var(--card);border:1px solid var(--line);
+  font-size:25px;font-weight:600;transition:var(--t)}
+.keypad button:active{background:var(--accent-soft);transform:scale(.92)}
+.shake{animation:shake 380ms}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+/* ===================== CHAT ===================== */
+#aiBody{display:flex;flex-direction:column;gap:10px;padding:14px 0}
+.msg{max-width:86%;padding:12px 15px;border-radius:20px;white-space:pre-wrap;font-size:14.5px;line-height:1.5;animation:fade 200ms}
+.msg.u{align-self:flex-end;background:var(--accent);color:#04120D;border-bottom-right-radius:7px;font-weight:500}
+.msg.a{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:7px}
+.ai-input{position:fixed;bottom:calc(72px + var(--safe-b));left:0;right:0;max-width:520px;margin:0 auto;
+  padding:10px 18px;background:var(--glass);backdrop-filter:blur(18px);display:flex;gap:9px;border-top:1px solid var(--line)}
+.typing i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--txt3);margin-right:4px;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.25}30%{opacity:1}}
+
+/* ===================== TOAST ===================== */
+#toast{position:fixed;left:50%;transform:translateX(-50%) translateY(-24px);top:calc(14px + var(--safe-t));
+  z-index:200;background:var(--card);color:var(--txt);border:1px solid var(--line);box-shadow:var(--shadow);
+  padding:12px 18px;border-radius:var(--r-pill);font-size:14px;font-weight:600;opacity:0;pointer-events:none;
+  transition:var(--t);max-width:88%;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{border-color:var(--err);color:var(--err)}
+#toast.ok{border-color:var(--accent)}
+
+/* charts */
+.bars{display:flex;align-items:flex-end;gap:5px;height:130px}
+.bars .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;height:100%}
+.bars .b i{display:block;width:100%;border-radius:7px 7px 3px 3px;background:var(--accent-soft);
+  border-bottom:3px solid var(--accent);min-height:3px;transition:height 400ms}
+.bars .b span{font-size:9.5px;color:var(--txt3)}
+.legend{display:flex;align-items:center;gap:9px;padding:7px 0}
+.legend .dot{width:10px;height:10px;border-radius:3px;flex:none}
+</style>
+</head>
+<body>
+<div id="root">
+
+<!-- ============ SPLASH ============ -->
+<div id="splash" class="active">
+  <div class="splash-logo">💰</div>
+  <div class="splash-title">МОЙ БЮДЖЕТ</div>
+  <div class="splash-sub">Управляй деньгами. Планируй будущее.</div>
+  <div class="splash-bar"><i></i></div>
+</div>
+
+<!-- ============ ONBOARDING ============ -->
+<div id="onboarding" class="screen">
+  <button class="ob-skip" onclick="Onb.finish()">Пропустить</button>
+  <div class="ob-body">
+    <div class="ob-emoji" id="obE">💰</div>
+    <h1 class="ob-h" id="obH"></h1>
+    <p class="ob-p" id="obP"></p>
+  </div>
+  <div class="dots" id="obDots"></div>
+  <button class="btn" id="obBtn" onclick="Onb.next()">ДАЛЕЕ</button>
+</div>
+
+<!-- ============ AUTH ============ -->
+<div id="auth" class="screen">
+  <div style="padding:calc(28px + var(--safe-t)) 20px calc(30px + var(--safe-b))">
+    <div style="text-align:center;margin-bottom:24px">
+      <div class="splash-logo" style="margin:0 auto 14px;width:64px;height:64px;font-size:30px;border-radius:20px"></div>
+      <h1 style="font-size:24px;font-weight:800;margin:0">МОЙ БЮДЖЕТ</h1>
+      <p class="mut" style="margin:6px 0 0;font-size:14px">Управляй деньгами. Планируй будущее.</p>
+    </div>
+    <div class="seg" style="margin-bottom:20px">
+      <button id="tabLogin" class="on" onclick="Auth.tab('login')">Вход</button>
+      <button id="tabReg" onclick="Auth.tab('reg')">Регистрация</button>
+    </div>
+
+    <form id="formLogin" onsubmit="Auth.login(event)">
+      <div class="field"><label>Телефон</label><input class="inp" id="lgPhone" type="tel" inputmode="tel" placeholder="+992 900 00 00 00" required></div>
+      <div class="field"><label>Пароль</label><input class="inp" id="lgPass" type="password" placeholder="••••••••" required></div>
+      <button class="btn" type="submit" id="lgBtn" style="margin-top:8px">ВОЙТИ</button>
+      <button class="btn ghost" type="button" style="margin-top:10px" onclick="Auth.reset()">Забыли пароль?</button>
+    </form>
+
+    <form id="formReg" class="hide" onsubmit="Auth.submitReg(event)">
+      <div id="regStep1">
+      <div class="row" style="gap:10px">
+        <div class="field grow"><label>Имя *</label><input class="inp" id="rgFirst" required></div>
+        <div class="field grow"><label>Фамилия *</label><input class="inp" id="rgLast" required></div>
+      </div>
+      <div class="field"><label>Отчество</label><input class="inp" id="rgMiddle" placeholder="необязательно"></div>
+      <div class="row" style="gap:10px">
+        <div class="field grow"><label>Дата рождения</label><input class="inp" id="rgBirth" type="date"></div>
+        <div class="field grow"><label>Пол</label>
+          <select class="inp" id="rgGender"><option value="">—</option><option value="male">Мужской</option><option value="female">Женский</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Телефон *</label><input class="inp" id="rgPhone" type="tel" inputmode="tel" placeholder="+992 900 00 00 00" required></div>
+      <div class="field"><label>Пароль * (мин. 6 символов)</label><input class="inp" id="rgPass" type="password" minlength="6" required></div>
+      <p class="mut3" style="font-size:12px;margin:4px 6px 14px">Регистрируясь, вы принимаете условия использования и политику конфиденциальности.</p>
+      </div>
+
+      <div id="regStep2" class="hide">
+        <div class="card" style="text-align:center;margin-bottom:16px">
+          <div style="font-size:38px">💬</div>
+          <div style="font-weight:800;font-size:17px;margin-top:4px">Подтверждение номера</div>
+          <p class="mut" id="rgCodeHint" style="font-size:13.5px;margin:8px 0 0">Нажмите «Получить код» — откроется Telegram, и бот пришлёт вам код авторизации.</p>
+        </div>
+        <div class="field"><label>Код авторизации</label>
+          <input class="inp" id="rgCode" inputmode="numeric" maxlength="6" placeholder="— — — — — —"
+            style="text-align:center;font-size:26px;font-weight:800;letter-spacing:8px"></div>
+        <button class="btn soft" type="button" id="rgGetCode" onclick="OTP.request()">📲 ПОЛУЧИТЬ КОД В TELEGRAM</button>
+        <button class="btn" type="submit" id="rgBtn" style="margin-top:10px">ПОДТВЕРДИТЬ И СОЗДАТЬ АККАУНТ</button>
+        <button class="btn ghost" type="button" style="margin-top:10px;background:none;border:0;color:var(--txt2);height:44px"
+          onclick="OTP.back()">‹ Изменить данные</button>
+      </div>
+      <button class="btn" type="submit" id="rgNext">ПРОДОЛЖИТЬ</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ SETUP ============ -->
+<div id="setup" class="screen">
+  <div style="padding:calc(28px + var(--safe-t)) 20px calc(30px + var(--safe-b))">
+    <h1 id="stHello" style="font-size:24px;font-weight:800;margin:0 0 4px"></h1>
+    <p class="mut" style="margin:0 0 24px">Настроим ваш бюджет за 3 шага</p>
+    <div class="dots" id="stDots" style="justify-content:flex-start;margin-bottom:22px"></div>
+
+    <div id="st1">
+      <h2 style="font-size:20px;margin:0 0 16px">Какая у вас зарплата?</h2>
+      <div class="field"><label>Сумма</label><input class="inp" id="stAmount" type="number" inputmode="decimal" placeholder="8000" style="font-size:22px;font-weight:700"></div>
+      <div class="field"><label>Валюта</label>
+        <select class="inp" id="stCurrency">
+          <option value="TJS">TJS — сомони (с.)</option><option value="USD">USD — доллар ($)</option>
+          <option value="EUR">EUR — евро (€)</option><option value="RUB">RUB — рубль (₽)</option>
+          <option value="KZT">KZT — тенге (₸)</option><option value="UZS">UZS — сум</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="st2" class="hide">
+      <h2 style="font-size:20px;margin:0 0 16px">Когда вы получаете зарплату?</h2>
+      <div class="field"><label>Периодичность</label>
+        <select class="inp" id="stFreq"><option value="monthly">Каждый месяц</option><option value="weekly">Каждую неделю</option><option value="none">Нерегулярно</option></select>
+      </div>
+      <div class="field" id="stDayWrap"><label>Число месяца</label>
+        <select class="inp" id="stDay"></select>
+      </div>
+      <p class="mut3" style="font-size:12.5px;margin:10px 4px">Доход будет автоматически добавляться в баланс в этот день.</p>
+    </div>
+
+    <div id="st3" class="hide">
+      <h2 style="font-size:20px;margin:0 0 6px">Есть обязательные платежи?</h2>
+      <p class="mut" style="margin:0 0 16px;font-size:14px">Квартира, интернет, кредит — добавим напоминания.</p>
+      <div id="stPayList"></div>
+      <button class="btn soft" type="button" onclick="Setup.addPayment()" style="margin-top:8px">＋ Добавить платёж</button>
+    </div>
+
+    <div class="row" style="gap:10px;margin-top:26px">
+      <button class="btn ghost" id="stBack" onclick="Setup.back()" style="flex:0 0 40%">Назад</button>
+      <button class="btn" id="stNext" onclick="Setup.next()">ДАЛЕЕ</button>
+    </div>
+    <button class="btn ghost" id="stSkip" onclick="Setup.skip()" style="margin-top:10px;background:none;border:0;color:var(--txt2);height:44px">Пропустить настройку</button>
+  </div>
+</div>
+
+<!-- ============ PIN LOCK ============ -->
+<div id="lock">
+  <div style="font-size:40px">🔒</div>
+  <div id="lockTitle" style="font-size:19px;font-weight:700">Введите PIN-код</div>
+  <div class="mut" id="lockSub" style="font-size:13.5px;margin-top:-12px">Для доступа к приложению</div>
+  <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
+  <div class="keypad" id="keypad"></div>
+  <button class="btn ghost" style="width:auto;padding:0 20px;height:44px" onclick="Lock.logout()">Выйти из аккаунта</button>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="screen">
+  <div class="top row sp" id="appTop">
+    <div class="row grow" style="gap:11px">
+      <div class="avatar" id="hAvatar" onclick="Nav.go('profile')">?</div>
+      <div class="grow" style="min-width:0">
+        <div class="mut" style="font-size:12.5px" id="hGreet">Привет</div>
+        <div style="font-weight:700;font-size:16px" class="trunc" id="hName">—</div>
+      </div>
+    </div>
+    <button class="icon-btn" onclick="Nav.go('search')">🔎</button>
+    <button class="icon-btn" onclick="Nav.go('payments')" style="position:relative">🔔<span id="payDot" class="hide" style="position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--err)"></span></button>
+  </div>
+
+  <!-- HOME -->
+  <div class="view active" id="v-home">
+    <div style="height:16px"></div>
+    <div class="balance">
+      <div class="lab">МОЙ БАЛАНС</div>
+      <div class="big amount" id="bBal">—</div>
+      <div class="io">
+        <div><span>↑ ДОХОД</span><b class="amount" id="bInc">—</b></div>
+        <div><span>↓ РАСХОД</span><b class="amount" id="bExp">—</b></div>
+      </div>
+    </div>
+    <div id="homeAlerts"></div>
+    <div id="homeGoal"></div>
+    <div id="homePay"></div>
+    <div class="row sp" style="margin:22px 2px 10px">
+      <div class="sec-title" style="margin:0">Последние операции</div>
+      <button class="mut" style="font-size:13px;font-weight:600;color:var(--accent)" onclick="Nav.go('history')">Все</button>
+    </div>
+    <div id="homeTx"></div>
+    <button class="btn" style="margin-top:18px" onclick="AddTx.open()">＋ Добавить расход</button>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="view" id="v-analytics">
+    <div style="height:16px"></div>
+    <div class="seg" id="anSeg">
+      <button data-p="day">День</button><button data-p="week">Неделя</button>
+      <button data-p="month" class="on">Месяц</button><button data-p="year">Год</button>
+    </div>
+    <div id="anBody"></div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="view" id="v-goals">
+    <div style="height:16px"></div>
+    <div class="row sp"><h2 style="margin:0;font-size:22px;font-weight:800">🎯 Цели</h2>
+      <button class="btn soft sm" onclick="Goals.edit()">＋ Цель</button></div>
+    <div id="goalsBody" style="margin-top:14px"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="view" id="v-profile">
+    <div style="height:18px"></div>
+    <div class="card row" style="gap:14px">
+      <div class="avatar" id="pAvatar" style="width:58px;height:58px;font-size:20px">?</div>
+      <div class="grow" style="min-width:0">
+        <div style="font-weight:800;font-size:17px" class="trunc" id="pName">—</div>
+        <div class="mut trunc" style="font-size:13.5px" id="pPhone">—</div>
+      </div>
+      <button class="icon-btn" onclick="Profile.editInfo()">✏️</button>
+    </div>
+    <div id="profBody"></div>
+    <p class="mut3" style="text-align:center;font-size:12px;margin-top:22px">МОЙ БЮДЖЕТ · версия 1.0</p>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="view" id="v-payments">
+    <div style="height:16px"></div>
+    <div class="row sp"><h2 style="margin:0;font-size:22px;font-weight:800">🔔 Платежи</h2>
+      <button class="btn soft sm" onclick="Pay.edit()">＋ Платёж</button></div>
+    <div class="chips" id="payFilters" style="margin:14px 0 4px">
+      <button class="chip" data-f="today">Сегодня</button><button class="chip" data-f="week">Неделя</button>
+      <button class="chip on" data-f="month">Месяц</button><button class="chip" data-f="all">Все</button>
+    </div>
+    <div id="payBody"></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="view" id="v-history">
+    <div style="height:16px"></div>
+    <div class="row sp"><h2 style="margin:0;font-size:22px;font-weight:800">Операции</h2>
+      <button class="btn ghost sm" onclick="Exp.csv()">⤓ CSV</button></div>
+    <div class="chips" id="hsFilters" style="margin:14px 0 4px">
+      <button class="chip on" data-f="all">Все</button><button class="chip" data-f="expense">Расходы</button>
+      <button class="chip" data-f="income">Доходы</button>
+    </div>
+    <div id="hsBody"></div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="view" id="v-search">
+    <div style="height:16px"></div>
+    <input class="inp" id="sQ" placeholder="🔎 Поиск: расход, платёж, цель…" oninput="Search.run()" autocomplete="off">
+    <div id="sBody"></div>
+  </div>
+
+  <!-- AI -->
+  <div class="view" id="v-ai" style="padding-bottom:calc(150px + var(--safe-b))">
+    <div id="aiBody"></div>
+  </div>
+  <div class="ai-input hide" id="aiInputBar">
+    <input class="inp grow" id="aiQ" placeholder="Спросите о своих финансах…" onkeydown="if(event.key==='Enter')AI.send()" autocomplete="off">
+    <button class="btn" style="width:52px;flex:none;height:52px;border-radius:16px;font-size:19px" onclick="AI.send()">➤</button>
+  </div>
+
+  <!-- CATEGORIES / BUDGETS / ACCOUNTS / SETTINGS SUBVIEWS -->
+  <div class="view" id="v-sub"><div style="height:16px"></div><div id="subBody"></div></div>
+
+  <!-- NAV -->
+  <div class="nav" id="nav">
+    <button data-v="home" class="on" onclick="Nav.go('home')"><span class="n-i">🏠</span>Главная</button>
+    <button data-v="analytics" onclick="Nav.go('analytics')"><span class="n-i">📊</span>Аналитика</button>
+    <div class="fab-slot"><button class="fab" onclick="AddTx.open()">＋</button></div>
+    <button data-v="goals" onclick="Nav.go('goals')"><span class="n-i">🎯</span>Цели</button>
+    <button data-v="profile" onclick="Nav.go('profile')"><span class="n-i">👤</span>Профиль</button>
+  </div>
+</div>
+
+<!-- SHEET -->
+<div class="sheet-wrap" id="sheetWrap">
+  <div class="sheet-bg" onclick="Sheet.close()"></div>
+  <div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+</div>
+
+<div id="toast"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ============================================================
+   МОЙ БЮДЖЕТ — Personal Finance App (single-file)
+   Firebase Authentication + Realtime Database
+   ============================================================ */
+/* ============================================================
+   ⚙️ НАСТРОЙКИ TELEGRAM-БОТА — ЗАПОЛНИТЕ ЭТИ 3 СТРОКИ
+   1) BOT_TOKEN   — токен от @BotFather (/newbot)
+   2) BOT_USERNAME— username бота без «@»
+   3) ADMIN_CHAT_ID — ваш chat_id (узнать: напишите боту и откройте
+      https://api.telegram.org/bot<ТОКЕН>/getUpdates), сюда придут коды,
+      если пользователь ещё не запускал бота
+   ============================================================ */
+const TG_BOT = {
+  BOT_TOKEN:    "",              // например: "7712345678:AAH9x...".
+  BOT_USERNAME: "",              // например: "moy_budjet_bot"
+  ADMIN_CHAT_ID:""               // например: "998625945"
+};
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDmpZNHIoArvUVTMyAmE_q5G-w5sceJ-dQ",
+  authDomain: "moy-budjet.firebaseapp.com",
+  databaseURL: "https://moy-budjet-default-rtdb.firebaseio.com",
+  projectId: "moy-budjet",
+  storageBucket: "moy-budjet.firebasestorage.app",
+  messagingSenderId: "998625945398",
+  appId: "1:998625945398:web:f53d9b95ed618fadbb3597",
+  measurementId: "G-D7YYVBTGSH"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.database();
+
+/* ===================== STATE ===================== */
+const S = {
+  uid:null, data:null, view:'home', ready:false, unlocked:false,
+  anPeriod:'month', payFilter:'month', hsFilter:'all', aiMsgs:[], booted:false
+};
+const CUR = {TJS:'с.',USD:'$',EUR:'€',RUB:'₽',KZT:'₸',UZS:'сум'};
+const CATS = [
+  {id:'housing',n:'Жильё',e:'🏠'},{id:'grocery',n:'Продукты',e:'🛒'},{id:'food',n:'Еда',e:'🍔'},
+  {id:'transport',n:'Транспорт',e:'🚕'},{id:'clothes',n:'Одежда',e:'👕'},{id:'mobile',n:'Связь',e:'📱'},
+  {id:'health',n:'Здоровье',e:'💊'},{id:'fun',n:'Развлечения',e:'🎮'},{id:'edu',n:'Образование',e:'📚'},
+  {id:'credit',n:'Кредиты',e:'💳'},{id:'tax',n:'Налоги / Патент',e:'📄'},{id:'utility',n:'Коммунальные',e:'💡'},
+  {id:'travel',n:'Путешествия',e:'✈️'},{id:'gift',n:'Подарки',e:'🎁'},{id:'shop',n:'Покупки',e:'📦'},
+  {id:'other',n:'Другое',e:'💰'}
+];
+const ACC_TYPES = {cash:{n:'Наличные',e:'💵'},card:{n:'Карта',e:'💳'},bank:{n:'Банковский счёт',e:'🏦'}};
+const FREQ = {none:'Не повторять',daily:'Каждый день',weekly:'Каждую неделю',monthly:'Каждый месяц',yearly:'Каждый год'};
+
+/* ===================== UTILS ===================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cur = () => (S.data && S.data.profile && S.data.profile.currency) || 'TJS';
+const sym = () => CUR[cur()] || cur();
+function fmt(n){ n = Math.round((Number(n)||0)*100)/100;
+  const neg = n<0; n = Math.abs(n);
+  const p = n.toFixed(n%1?2:0).split('.');
+  return (neg?'−':'') + p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ') + (p[1]?','+p[1]:''); }
+const money = n => fmt(n)+' '+sym();
+const obj = o => o ? Object.keys(o).map(k=>Object.assign({id:k},o[k])) : [];
+const iso = d => { const x=new Date(d); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); };
+const today = () => iso(new Date());
+const parseD = s => { const p=String(s).split('-'); return new Date(+p[0],+p[1]-1,+p[2]); };
+const daysBetween = (a,b) => Math.round((parseD(b)-parseD(a))/86400000);
+const MON = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const MONS = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+function dLabel(d){ const df = daysBetween(today(),d);
+  if(df===0) return 'Сегодня'; if(df===1) return 'Завтра'; if(df===-1) return 'Вчера';
+  const x = parseD(d); return x.getDate()+' '+MON[x.getMonth()] + (x.getFullYear()!==new Date().getFullYear()?' '+x.getFullYear():''); }
+function catOf(id){ const c = CATS.concat(obj(S.data && S.data.categories).map(x=>({id:x.id,n:x.name,e:x.icon})));
+  return c.find(x=>x.id===id) || {id:'other',n:'Другое',e:'💰'}; }
+function allCats(){ return CATS.concat(obj(S.data && S.data.categories).map(x=>({id:x.id,n:x.name,e:x.icon,custom:true}))); }
+function haptic(){ if(navigator.vibrate) try{navigator.vibrate(8)}catch(e){} }
+let toastT;
+function toast(msg,type){ const t=$('toast'); t.textContent=msg; t.className=(type||'')+' on';
+  clearTimeout(toastT); toastT=setTimeout(()=>t.className=t.className.replace('on','').trim(),2600); }
+function phoneKey(p){ const d = String(p).replace(/\D/g,''); return d; }
+async function sha(str){ const b = new TextEncoder().encode(str);
+  const h = await crypto.subtle.digest('SHA-256',b);
+  return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join(''); }
+
+/* ===================== THEME ===================== */
+const Theme = {
+  apply(mode){
+    const m = mode || (S.data&&S.data.profile&&S.data.profile.theme) || localStorage.mb_theme || 'system';
+    const dark = m==='dark' || (m==='system' && matchMedia('(prefers-color-scheme:dark)').matches);
+    document.documentElement.dataset.theme = dark?'dark':'light';
+    document.querySelector('meta[name=theme-color]').content = dark?'#0B0E11':'#F4F6F8';
+    localStorage.mb_theme = m;
+  },
+  set(m){ localStorage.mb_theme=m; Theme.apply(m); if(S.uid) db.ref('users/'+S.uid+'/profile/theme').set(m); Nav.render(); }
+};
+Theme.apply();
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>Theme.apply());
+
+/* ===================== SHEET ===================== */
+const Sheet = {
+  open(html){ $('sheetBody').innerHTML = html; $('sheetWrap').classList.add('on');
+    document.body.style.overflow='hidden'; const f=$('sheet').querySelector('input,textarea,select'); },
+  close(){ $('sheetWrap').classList.remove('on'); document.body.style.overflow=''; },
+  confirm(title,text,okText,fn){
+    window.__cfm = fn;
+    Sheet.open(`<h3>${esc(title)}</h3><p class="mut" style="margin:0 0 18px">${esc(text)}</p>
+      <button class="btn danger" onclick="Sheet.close();window.__cfm()">${esc(okText)}</button>
+      <button class="btn ghost" style="margin-top:10px" onclick="Sheet.close()">Отмена</button>`);
+  }
+};
+
+/* ===================== SCREENS ===================== */
+function show(id){ ['splash','onboarding','auth','setup','app'].forEach(x=>$(x).classList.toggle('active',x===id)); }
+
+/* ===================== ONBOARDING ===================== */
+const OB = [
+  {e:'💰',h:'Контролируйте деньги',p:'Знайте, сколько у вас осталось.'},
+  {e:'🔔',h:'Не забывайте платежи',p:'Получайте напоминания о важных расходах.'},
+  {e:'🎯',h:'Достигайте целей',p:'Планируйте накопления.'},
+  {e:'🤖',h:'Ваш AI-помощник',p:'Получайте анализ своих расходов.'}
+];
+const Onb = {
+  i:0,
+  start(){ Onb.i=0; show('onboarding'); Onb.render(); },
+  render(){ const s=OB[Onb.i]; $('obE').textContent=s.e; $('obE').style.animation='none'; void $('obE').offsetWidth; $('obE').style.animation='';
+    $('obH').textContent=s.h; $('obP').textContent=s.p;
+    $('obDots').innerHTML = OB.map((_,i)=>`<i class="${i===Onb.i?'on':''}"></i>`).join('');
+    $('obBtn').textContent = Onb.i===OB.length-1?'НАЧАТЬ':'ДАЛЕЕ'; },
+  next(){ haptic(); if(Onb.i<OB.length-1){ Onb.i++; Onb.render(); } else Onb.finish(); },
+  finish(){ localStorage.mb_onb='1'; show('auth'); }
+};
+
+/* ===================== AUTH ===================== */
+const Auth = {
+  mail(phone){ return 'p'+phoneKey(phone)+'@moy-budjet.app'; },
+  tab(t){
+    $('tabLogin').classList.toggle('on',t==='login'); $('tabReg').classList.toggle('on',t==='reg');
+    $('formLogin').classList.toggle('hide',t!=='login'); $('formReg').classList.toggle('hide',t!=='reg');
+    if(t==='login') OTP.stopPoll();
+  },
+  err(e){
+    const c = (e&&e.code)||'';
+    if(c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found')) return 'Неверный телефон или пароль.';
+    if(c.includes('email-already-in-use')) return 'Этот номер уже зарегистрирован. Выполните вход.';
+    if(c.includes('weak-password')) return 'Пароль слишком короткий (минимум 6 символов).';
+    if(c.includes('too-many-requests')) return 'Слишком много попыток. Попробуйте позже.';
+    if(c.includes('network')) return 'Нет соединения. Проверьте интернет и попробуйте ещё раз.';
+    if(c.includes('invalid-email')) return 'Проверьте формат номера телефона.';
+    if(c.includes('operation-not-allowed')) return 'В Firebase включите способ входа Email/Password.';
+    return 'Что-то пошло не так. Попробуйте ещё раз.';
+  },
+  async login(ev){
+    ev.preventDefault(); const b=$('lgBtn'); b.disabled=true; b.textContent='ВХОД…';
+    try{
+      const phone = $('lgPhone').value.trim();
+      if(phoneKey(phone).length<6) throw {code:'invalid-email'};
+      await auth.signInWithEmailAndPassword(Auth.mail(phone), $('lgPass').value);
+    }catch(e){ toast(Auth.err(e),'err'); }
+    b.disabled=false; b.textContent='ВОЙТИ';
+  },
+  submitReg(ev){
+    ev.preventDefault();
+    if(OTP.step===1) return OTP.next();
+    return Auth.register(ev);
+  },
+  async register(ev){
+    if(ev&&ev.preventDefault) ev.preventDefault();
+    if(!OTP.verify()) return;
+    const b=$('rgBtn'); b.disabled=true; b.textContent='СОЗДАЁМ…';
+    const phone = $('rgPhone').value.trim();
+    try{
+      if(phoneKey(phone).length<6) throw {code:'invalid-email'};
+      const cred = await auth.createUserWithEmailAndPassword(Auth.mail(phone), $('rgPass').value);
+      const p = {
+        firstName:$('rgFirst').value.trim(), lastName:$('rgLast').value.trim(),
+        middleName:$('rgMiddle').value.trim()||null, birthDate:$('rgBirth').value||null,
+        gender:$('rgGender').value||null, phone:phone, currency:'TJS',
+        theme:localStorage.mb_theme||'system', status:'active',
+        createdAt:Date.now(), updatedAt:Date.now(), onboarded:false
+      };
+      const payload = {
+        profile:p,
+        accounts:{ cash:{name:'Наличные',type:'cash',initialBalance:0,isActive:true,createdAt:Date.now()} },
+        settings:{ notifications:true, aiEnabled:true }
+      };
+      if(TG_BOT.BOT_TOKEN) payload.telegram = {
+        bot:{token:TG_BOT.BOT_TOKEN,username:TG_BOT.BOT_USERNAME,savedAt:Date.now()},
+        chatId: OTP.chat || TG_BOT.ADMIN_CHAT_ID || null,
+        connectedAt: OTP.chat?Date.now():null
+      };
+      await db.ref('users/'+cred.user.uid).set(payload);
+      OTP.reset();
+    }catch(e){ toast(Auth.err(e),'err'); }
+    b.disabled=false; b.textContent='СОЗДАТЬ АККАУНТ';
+  },
+  async reset(){
+    const phone = $('lgPhone').value.trim();
+    if(phoneKey(phone).length<6) return toast('Сначала введите номер телефона','err');
+    Sheet.open(`<h3>Восстановление пароля</h3>
+      <p class="mut" style="margin:0 0 16px;font-size:14px">Аккаунт привязан к номеру телефона. Для сброса пароля обратитесь в поддержку или войдите с другого устройства, где сессия активна.</p>
+      <button class="btn ghost" onclick="Sheet.close()">Понятно</button>`);
+  },
+  logout(){ Sheet.confirm('Выйти из аккаунта?','Данные останутся в облаке.','Выйти',()=>auth.signOut()); }
+};
+
+
+/* ===================== OTP ЧЕРЕЗ TELEGRAM ===================== */
+const OTP = {
+  step:1, code:null, exp:0, tries:0, chat:null, poller:null, offset:0, cooldown:0, timer:null,
+  reset(){ OTP.step=1; OTP.code=null; OTP.chat=null; OTP.tries=0; OTP.stopPoll(); clearInterval(OTP.timer);
+    const s1=$('regStep1'), s2=$('regStep2'), n=$('rgNext');
+    if(s1){ s1.classList.remove('hide'); s2.classList.add('hide'); n.classList.remove('hide'); }
+    if($('rgCode')) $('rgCode').value=''; },
+  back(){ OTP.step=1; OTP.stopPoll();
+    $('regStep1').classList.remove('hide'); $('regStep2').classList.add('hide'); $('rgNext').classList.remove('hide'); },
+  next(){
+    const f=$('rgFirst').value.trim(), l=$('rgLast').value.trim(),
+          ph=$('rgPhone').value.trim(), pw=$('rgPass').value;
+    if(!f||!l) return toast('Укажите имя и фамилию','err');
+    if(phoneKey(ph).length<6) return toast('Проверьте номер телефона','err');
+    if((pw||'').length<6) return toast('Пароль — минимум 6 символов','err');
+    OTP.step=2;
+    $('regStep1').classList.add('hide'); $('regStep2').classList.remove('hide'); $('rgNext').classList.add('hide');
+    window.scrollTo(0,0);
+  },
+  gen(){ return String(Math.floor(100000+Math.random()*900000)); },
+  async request(){
+    if(OTP.cooldown>Date.now()) return toast('Повторный код можно запросить через '+Math.ceil((OTP.cooldown-Date.now())/1000)+' с','err');
+    const btn=$('rgGetCode');
+    OTP.code = OTP.gen(); OTP.exp = Date.now()+5*60*1000; OTP.tries=0;
+
+    /* демо-режим: бот не настроен */
+    if(!TG_BOT.BOT_TOKEN){
+      $('rgCodeHint').innerHTML = '⚠️ Бот не настроен: заполните <b>TG_BOT</b> в начале файла.<br>Код для теста: <b style="font-size:19px;letter-spacing:2px">'+OTP.code+'</b>';
+      toast('Демо-режим: код '+OTP.code,'ok'); OTP.startCooldown(); return;
+    }
+
+    /* открываем Telegram сразу по клику — иначе браузер заблокирует окно */
+    if(TG_BOT.BOT_USERNAME) window.open('https://t.me/'+TG_BOT.BOT_USERNAME+'?start=auth','_blank');
+
+    btn.disabled=true; btn.textContent='ОТПРАВЛЯЕМ…';
+    const name = $('rgFirst').value.trim(), phone = $('rgPhone').value.trim();
+    const text = '🔐 МОЙ БЮДЖЕТ\n\nКод авторизации: ' + OTP.code +
+                 '\n\nПользователь: ' + name + ' (' + phone + ')\nКод действует 5 минут. Никому его не сообщайте.';
+    let delivered = false;
+
+    /* 1) сразу отправляем на chat_id из настроек */
+    if(TG_BOT.ADMIN_CHAT_ID){
+      try{ await OTP.api('sendMessage',{chat_id:TG_BOT.ADMIN_CHAT_ID,text:text}); delivered=true; }catch(e){}
+    }
+    /* 2) ждём, пока пользователь нажмёт START, и шлём код в его личный чат */
+    OTP.watch(text);
+
+    btn.disabled=false; btn.textContent='ОТПРАВИТЬ КОД ПОВТОРНО';
+    $('rgCodeHint').textContent = delivered
+      ? 'Код отправлен в Telegram. Если бот молчит — нажмите в нём START и код придёт автоматически.'
+      : 'Откройте бота и нажмите START — код придёт в чат в течение нескольких секунд.';
+    OTP.startCooldown();
+  },
+  startCooldown(){
+    OTP.cooldown = Date.now()+60000;
+    clearInterval(OTP.timer);
+    OTP.timer = setInterval(()=>{
+      const left = Math.ceil((OTP.cooldown-Date.now())/1000);
+      const b=$('rgGetCode'); if(!b) return clearInterval(OTP.timer);
+      if(left>0) b.textContent='ПОВТОРНО ЧЕРЕЗ '+left+' С';
+      else { b.textContent='ОТПРАВИТЬ КОД ПОВТОРНО'; clearInterval(OTP.timer); }
+    },1000);
+  },
+  async api(method,params){
+    const r = await fetch('https://api.telegram.org/bot'+TG_BOT.BOT_TOKEN+'/'+method,{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(params||{})});
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.description||'Telegram error');
+    return j.result;
+  },
+  watch(text){
+    OTP.stopPoll();
+    const until = Date.now()+120000;
+    OTP.poller = setInterval(async()=>{
+      if(Date.now()>until || OTP.step!==2) return OTP.stopPoll();
+      try{
+        const ups = await OTP.api('getUpdates',{offset:OTP.offset||0,limit:50,allowed_updates:['message']});
+        for(const u of ups){
+          OTP.offset = u.update_id+1;
+          const m = u.message; if(!m || !m.text) continue;
+          if(!/^\/start/i.test(m.text.trim())) continue;
+          if(String(m.chat.id)===String(TG_BOT.ADMIN_CHAT_ID)) continue;
+          OTP.chat = String(m.chat.id);
+          await OTP.api('sendMessage',{chat_id:OTP.chat,text:text});
+          $('rgCodeHint').textContent='Код отправлен вам в Telegram ✓';
+          toast('Код отправлен в Telegram ✓','ok');
+          OTP.stopPoll(); return;
+        }
+      }catch(e){}
+    },3000);
+  },
+  stopPoll(){ if(OTP.poller){ clearInterval(OTP.poller); OTP.poller=null; } },
+  verify(){
+    const v = ($('rgCode').value||'').trim();
+    if(!OTP.code) { toast('Сначала получите код','err'); return false; }
+    if(Date.now()>OTP.exp) { toast('Код истёк. Запросите новый.','err'); return false; }
+    if(OTP.tries>=5) { toast('Слишком много попыток. Запросите новый код.','err'); return false; }
+    if(v!==OTP.code){ OTP.tries++; toast('Неверный код авторизации','err'); return false; }
+    OTP.stopPoll(); return true;
+  }
+};
+
+/* ===================== SETUP (первый запуск) ===================== */
+const Setup = {
+  step:1, payments:[],
+  start(){
+    S.data=S.data||{}; const p=S.data.profile||{};
+    $('stHello').textContent = 'Добро пожаловать, '+(p.firstName||'друг')+'! 👋';
+    $('stCurrency').value = p.currency||'TJS';
+    $('stDay').innerHTML = Array.from({length:31},(_,i)=>`<option value="${i+1}" ${i+1===5?'selected':''}>${i+1} число</option>`).join('');
+    Setup.step=1; Setup.payments=[]; Setup.render(); show('setup');
+    $('stFreq').onchange=()=>$('stDayWrap').classList.toggle('hide',$('stFreq').value!=='monthly');
+  },
+  render(){
+    [1,2,3].forEach(i=>$('st'+i).classList.toggle('hide',i!==Setup.step));
+    $('stDots').innerHTML=[1,2,3].map(i=>`<i class="${i===Setup.step?'on':''}"></i>`).join('');
+    $('stBack').classList.toggle('hide',Setup.step===1);
+    $('stNext').textContent = Setup.step===3?'ГОТОВО':'ДАЛЕЕ';
+    Setup.renderPayments();
+  },
+  renderPayments(){
+    $('stPayList').innerHTML = Setup.payments.length ? Setup.payments.map((p,i)=>`
+      <div class="card row" style="padding:13px;margin-bottom:10px">
+        <div class="ico">${catOf(p.categoryId).e}</div>
+        <div class="grow"><div style="font-weight:700">${esc(p.title)}</div>
+          <div class="mut" style="font-size:12.5px">${p.day} число · ${FREQ[p.frequency]}</div></div>
+        <div class="amount">${fmt(p.amount)}</div>
+        <button class="icon-btn" onclick="Setup.payments.splice(${i},1);Setup.renderPayments()">✕</button>
+      </div>`).join('') : `<div class="empty" style="padding:18px"><div class="e-ico">🔔</div>Пока нет обязательных платежей</div>`;
+  },
+  addPayment(){
+    Sheet.open(`<h3>Обязательный платёж</h3>
+      <div class="field"><label>Название</label><input class="inp" id="spT" placeholder="Квартира"></div>
+      <div class="field"><label>Сумма</label><input class="inp" id="spA" type="number" inputmode="decimal" placeholder="2000"></div>
+      <div class="field"><label>Категория</label><select class="inp" id="spC">${allCats().map(c=>`<option value="${c.id}" ${c.id==='housing'?'selected':''}>${c.e} ${esc(c.n)}</option>`).join('')}</select></div>
+      <div class="field"><label>Число месяца</label><select class="inp" id="spD">${Array.from({length:31},(_,i)=>`<option ${i===19?'selected':''}>${i+1}</option>`).join('')}</select></div>
+      <button class="btn" onclick="Setup.savePayment()">Добавить</button>`);
+  },
+  savePayment(){
+    const t=$('spT').value.trim(), a=parseFloat($('spA').value);
+    if(!t||!(a>0)) return toast('Укажите название и сумму','err');
+    Setup.payments.push({title:t,amount:a,categoryId:$('spC').value,day:+$('spD').value,frequency:'monthly'});
+    Sheet.close(); Setup.renderPayments();
+  },
+  back(){ if(Setup.step>1){Setup.step--;Setup.render();} },
+  next(){
+    haptic();
+    if(Setup.step===1){
+      const a=parseFloat($('stAmount').value);
+      if(!(a>0)) return toast('Введите сумму дохода','err');
+      Setup.step=2; Setup.render(); return;
+    }
+    if(Setup.step===2){ Setup.step=3; Setup.render(); return; }
+    Setup.save();
+  },
+  async save(){
+    const amount=parseFloat($('stAmount').value)||0, currency=$('stCurrency').value,
+          freq=$('stFreq').value, day=+$('stDay').value||5;
+    const upd = {};
+    upd['profile/currency']=currency; upd['profile/onboarded']=true; upd['profile/updatedAt']=Date.now();
+    if(amount>0) upd['income/main']={name:'Зарплата',amount,currency,paymentDay:day,frequency:freq,isActive:true,
+      startDate:today(),createdAt:Date.now()};
+    Setup.payments.forEach((p,i)=>{
+      const d=new Date(); let due=new Date(d.getFullYear(),d.getMonth(),Math.min(p.day,28));
+      upd['recurring/rp'+Date.now()+i]={title:p.title,amount:p.amount,categoryId:p.categoryId,
+        frequency:'monthly',startDate:iso(due),reminderDays:1,isActive:true,createdAt:Date.now()};
+    });
+    try{ await db.ref('users/'+S.uid).update(upd); toast('Готово! Добро пожаловать 🎉','ok'); }
+    catch(e){ toast('Не удалось сохранить настройки. Проверьте интернет.','err'); }
+  },
+  async skip(){
+    await db.ref('users/'+S.uid+'/profile/onboarded').set(true);
+  }
+};
+
+/* ===================== DATA LAYER ===================== */
+const DB = {
+  ref(p){ return db.ref('users/'+S.uid+(p?'/'+p:'')); },
+  push(p,v){ return DB.ref(p).push(v); },
+  set(p,v){ return DB.ref(p).set(v); },
+  upd(p,v){ return DB.ref(p).update(v); },
+  del(p){ return DB.ref(p).remove(); }
+};
+function txs(){ return obj(S.data && S.data.transactions).sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id)); }
+function goalsList(){ return obj(S.data && S.data.goals); }
+function recurring(){ return obj(S.data && S.data.recurring).filter(r=>r.isActive!==false); }
+function accounts(){ const a=obj(S.data && S.data.accounts); return a.length?a:[{id:'cash',name:'Наличные',type:'cash'}]; }
+
+/* Авто-начисление зарплаты за прошедшие даты выплаты (идемпотентно) */
+async function ensureIncome(){
+  const inc = S.data && S.data.income && S.data.income.main;
+  if(!inc || !(inc.amount>0) || inc.isActive===false) return;
+  if(inc.frequency==='none') return;
+  const start = parseD(inc.startDate||today()), now = new Date(), upd = {};
+  const existing = S.data.transactions||{};
+  if(inc.frequency==='monthly'){
+    let d = new Date(start.getFullYear(), start.getMonth(), 1);
+    while(d <= now){
+      const day = Math.min(inc.paymentDay||1, new Date(d.getFullYear(),d.getMonth()+1,0).getDate());
+      const pay = new Date(d.getFullYear(), d.getMonth(), day);
+      if(pay>=start && pay<=now){
+        const key = 'sal_'+pay.getFullYear()+'_'+(pay.getMonth()+1);
+        if(!existing[key]) upd[key]={type:'income',amount:inc.amount,title:inc.name||'Зарплата',
+          categoryId:'salary',accountId:'cash',date:iso(pay),source:'recurring',createdAt:Date.now()};
+      }
+      d = new Date(d.getFullYear(), d.getMonth()+1, 1);
+    }
+  } else if(inc.frequency==='weekly'){
+    let d = new Date(start);
+    while(d<=now){ const key='sal_w_'+iso(d);
+      if(!existing[key]) upd[key]={type:'income',amount:inc.amount,title:inc.name||'Зарплата',
+        categoryId:'salary',accountId:'cash',date:iso(d),source:'recurring',createdAt:Date.now()};
+      d = new Date(d.getTime()+7*86400000);
+    }
+  }
+  if(Object.keys(upd).length) try{ await DB.upd('transactions',upd); }catch(e){}
+}
+
+/* Экземпляры регулярных платежей */
+function occurrences(r, fromISO, toISO){
+  const out=[], from=parseD(fromISO), to=parseD(toISO);
+  let d = parseD(r.startDate||today()); let guard=0;
+  if(r.frequency==='none'){ if(d>=from&&d<=to) out.push(iso(d)); return out; }
+  while(d<=to && guard++<800){
+    if(d>=from) out.push(iso(d));
+    if(r.frequency==='daily') d=new Date(d.getTime()+86400000);
+    else if(r.frequency==='weekly') d=new Date(d.getTime()+7*86400000);
+    else if(r.frequency==='yearly') d=new Date(d.getFullYear()+1,d.getMonth(),d.getDate());
+    else { const day=parseD(r.startDate).getDate(); const nm=new Date(d.getFullYear(),d.getMonth()+1,1);
+           d=new Date(nm.getFullYear(),nm.getMonth(),Math.min(day,new Date(nm.getFullYear(),nm.getMonth()+1,0).getDate())); }
+  }
+  return out;
+}
+function payInstances(range){
+  const t=today(), now=new Date();
+  let from, to;
+  if(range==='today'){ from=t; to=t; }
+  else if(range==='week'){ from=t; to=iso(new Date(now.getTime()+7*86400000)); }
+  else if(range==='all'){ from=iso(new Date(now.getFullYear(),now.getMonth()-6,1)); to=iso(new Date(now.getFullYear(),now.getMonth()+6,28)); }
+  else { from=iso(new Date(now.getFullYear(),now.getMonth(),1)); to=iso(new Date(now.getFullYear(),now.getMonth()+1,0)); }
+  const past = iso(new Date(now.getFullYear(),now.getMonth()-2,1));
+  const list=[];
+  recurring().forEach(r=>{
+    occurrences(r, range==='today'||range==='week'?past:from, to).forEach(d=>{
+      const paid = r.paid && r.paid[d];
+      const status = paid?'paid':(daysBetween(today(),d)<0?'overdue':'pending');
+      if((range==='today'||range==='week') && status!=='overdue' && (d<from||d>to)) return;
+      if(range==='month' && d<from) return;
+      list.push({rid:r.id,title:r.title,amount:r.amount,categoryId:r.categoryId,due:d,status,reminderDays:r.reminderDays||1,frequency:r.frequency});
+    });
+  });
+  return list.sort((a,b)=>a.due.localeCompare(b.due));
+}
+function nextPayment(){
+  const l = payInstances('all').filter(p=>p.status!=='paid' && daysBetween(today(),p.due)>=-40);
+  const over = l.filter(p=>p.status==='overdue').sort((a,b)=>b.due.localeCompare(a.due));
+  const up = l.filter(p=>p.status==='pending');
+  return over[0] || up[0] || null;
+}
+
+/* ===================== РАСЧЁТЫ ===================== */
+function inRange(d,period,ref){
+  const r = ref||new Date();
+  if(period==='day') return d===iso(r);
+  if(period==='week'){ const s=new Date(r); s.setDate(r.getDate()-6); return parseD(d)>=new Date(s.getFullYear(),s.getMonth(),s.getDate()) && parseD(d)<=r; }
+  if(period==='month') return d.slice(0,7)===iso(r).slice(0,7);
+  if(period==='year') return d.slice(0,4)===iso(r).slice(0,4);
+  return true;
+}
+function totals(period){
+  let inc=0,exp=0; const byCat={};
+  txs().forEach(t=>{ if(period && !inRange(t.date,period)) return;
+    if(t.type==='income') inc+=+t.amount||0;
+    else { exp+=+t.amount||0; byCat[t.categoryId]=(byCat[t.categoryId]||0)+(+t.amount||0); } });
+  return {inc,exp,byCat};
+}
+function balance(){ let b=0; txs().forEach(t=>b += t.type==='income'?(+t.amount||0):-(+t.amount||0));
+  accounts().forEach(a=>b += +a.initialBalance||0); return b; }
+function budgetState(){
+  const m = totals('month').byCat, out=[];
+  Object.entries((S.data&&S.data.budgets)||{}).forEach(([cid,b])=>{
+    const lim=+b.limit||0, used=m[cid]||0;
+    if(lim>0) out.push({cid,limit:lim,used,pct:Math.round(used/lim*100)});
+  });
+  return out.sort((a,b)=>b.pct-a.pct);
+}
+
+/* ===================== HOME ===================== */
+const Home = {
+  render(){
+    const p=S.data.profile||{}, h=new Date().getHours();
+    const greet = h<5?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер';
+    $('hGreet').textContent='👋 '+greet; $('hName').textContent=(p.firstName||'')+' '+(p.lastName||'');
+    const ini=((p.firstName||'?')[0]||'?')+((p.lastName||'')[0]||'');
+    $('hAvatar').textContent=ini.toUpperCase(); $('pAvatar').textContent=ini.toUpperCase();
+    $('pName').textContent=[p.lastName,p.firstName,p.middleName].filter(Boolean).join(' ')||'—';
+    $('pPhone').textContent=p.phone||'—';
+
+    const m=totals('month');
+    $('bBal').textContent=money(balance());
+    $('bInc').textContent=fmt(m.inc); $('bExp').textContent=fmt(m.exp);
+
+    /* Алерты по бюджетам */
+    const al = budgetState().filter(b=>b.pct>=80);
+    $('homeAlerts').innerHTML = al.length ? al.slice(0,2).map(b=>{
+      const c=catOf(b.cid), over=b.pct>=100;
+      return `<div class="card" style="margin-top:14px;border-color:${over?'var(--err)':'var(--warn)'}">
+        <div class="row"><div class="ico">${over?'🔴':'⚠️'}</div><div class="grow">
+        <div style="font-weight:700;font-size:14px">${over?'Лимит категории достигнут':'Вы использовали '+b.pct+'% бюджета'}</div>
+        <div class="mut" style="font-size:12.5px">${c.e} ${esc(c.n)} · ${fmt(b.used)} из ${money(b.limit)}</div></div></div></div>`;
+    }).join('') : '';
+
+    /* Цель */
+    const g = goalsList().sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999'))[0];
+    $('homeGoal') && ($('homeGoal').innerHTML = g ? (()=> {
+      const pct=Math.min(100,Math.round((+g.currentAmount||0)/(+g.targetAmount||1)*100));
+      return `<div class="sec-title">🎯 Цель</div>
+      <div class="card" onclick="Nav.go('goals')">
+        <div class="row sp"><div style="font-weight:700">${esc(g.name)}</div><div class="amount">${money(g.targetAmount)}</div></div>
+        <div class="prog" style="margin:12px 0 8px"><i style="width:${pct}%"></i></div>
+        <div class="row sp mut" style="font-size:12.5px"><span>${fmt(g.currentAmount||0)} / ${fmt(g.targetAmount)}</span><b style="color:var(--accent)">${pct}%</b></div>
+      </div>`; })() : `<div class="sec-title">🎯 Цель</div>
+      <div class="card" style="text-align:center"><div style="font-size:34px;opacity:.6">🎯</div>
+      <div class="mut" style="margin:6px 0 12px;font-size:14px">Создайте первую финансовую цель.</div>
+      <button class="btn soft sm" onclick="Goals.edit()">＋ Создать цель</button></div>`);
+
+    /* Ближайший платёж */
+    const np = nextPayment();
+    $('homePay').innerHTML = np ? (()=>{ const c=catOf(np.categoryId), over=np.status==='overdue';
+      return `<div class="sec-title">🔔 Ближайший платёж</div>
+      <div class="card row" onclick="Nav.go('payments')">
+        <div class="ico">${c.e}</div>
+        <div class="grow"><div style="font-weight:700">${esc(np.title)}</div>
+          <div style="font-size:12.5px" class="${over?'':'mut'}" ${over?'style="color:var(--err);font-size:12.5px"':''}>${over?'Просрочен · ':''}${dLabel(np.due)}</div></div>
+        <div style="text-align:right"><div class="amount">${money(np.amount)}</div>
+          <button class="badge b-ok" style="margin-top:5px" onclick="event.stopPropagation();Pay.markPaid('${np.rid}','${np.due}')">ОПЛАЧЕНО</button></div>
+      </div>`; })() : `<div class="sec-title">🔔 Ближайший платёж</div>
+      <div class="card" style="text-align:center"><div class="mut" style="font-size:14px">Ближайших платежей нет 🎉</div></div>`;
+
+    const last = txs().slice(0,5);
+    $('homeTx').innerHTML = last.length ? `<div class="card" style="padding:6px 18px">${last.map(txRow).join('')}</div>`
+      : `<div class="card empty"><div class="e-ico">🧾</div>Здесь пока нет расходов.<br>
+         <button class="btn soft sm" style="margin-top:12px" onclick="AddTx.open()">＋ Добавить первый расход</button></div>`;
+
+    const dot = payInstances('week').some(p=>p.status!=='paid');
+    $('payDot').classList.toggle('hide',!dot);
+  }
+};
+function txRow(t){
+  const c = t.type==='income'?{e:'💵',n:'Доход'}:catOf(t.categoryId);
+  return `<div class="list-item" onclick="AddTx.open('${t.id}')">
+    <div class="ico">${c.e}</div>
+    <div class="grow" style="min-width:0"><div style="font-weight:600" class="trunc">${esc(t.title||c.n)}</div>
+      <div class="mut" style="font-size:12px">${esc(c.n)} · ${dLabel(t.date)}</div></div>
+    <div class="amount" style="color:${t.type==='income'?'var(--ok)':'var(--txt)'}">${t.type==='income'?'+':'−'}${fmt(t.amount)}</div>
+  </div>`;
+}
+
+/* ===================== ДОБАВЛЕНИЕ ОПЕРАЦИИ ===================== */
+const AddTx = {
+  cat:'food', type:'expense', editing:null,
+  open(id){
+    const t = id ? txs().find(x=>x.id===id) : null;
+    AddTx.editing = t? t.id : null;
+    AddTx.type = t? t.type : 'expense';
+    AddTx.cat = t? t.categoryId : 'food';
+    Sheet.open(`
+      <h3>${t?'Изменить операцию':'Новая операция'}</h3>
+      <div class="seg" style="margin-bottom:16px">
+        <button id="ttExp" class="${AddTx.type==='expense'?'on':''}" onclick="AddTx.setType('expense')">Расход</button>
+        <button id="ttInc" class="${AddTx.type==='income'?'on':''}" onclick="AddTx.setType('income')">Доход</button>
+      </div>
+      <div style="text-align:center;margin-bottom:8px">
+        <input class="inp" id="txA" type="number" inputmode="decimal" step="0.01" value="${t?t.amount:''}" placeholder="0"
+          style="text-align:center;font-size:34px;font-weight:800;height:70px;border:0;background:transparent">
+        <div class="mut" style="margin-top:-6px;font-size:13px">${sym()}</div>
+      </div>
+      <div class="field"><label>Название</label><input class="inp" id="txT" value="${esc(t?t.title:'')}" placeholder="Обед"></div>
+      <div class="field" id="txCatWrap"><label>Категория</label>
+        <div class="cat-grid" id="txCats">${allCats().map(c=>`<div class="cat-cell ${c.id===AddTx.cat?'on':''}" data-c="${c.id}" onclick="AddTx.setCat('${c.id}')"><span class="e">${c.e}</span>${esc(c.n)}</div>`).join('')}</div>
+      </div>
+      <div class="row" style="gap:10px">
+        <div class="field grow"><label>Дата</label><input class="inp" id="txD" type="date" value="${t?t.date:today()}"></div>
+        <div class="field grow"><label>Счёт</label><select class="inp" id="txAcc">${accounts().map(a=>`<option value="${a.id}" ${t&&t.accountId===a.id?'selected':''}>${(ACC_TYPES[a.type]||{e:'💵'}).e} ${esc(a.name)}</option>`).join('')}</select></div>
+      </div>
+      <button class="btn" onclick="AddTx.save()">СОХРАНИТЬ</button>
+      ${t?`<button class="btn danger" style="margin-top:10px" onclick="AddTx.del('${t.id}')">Удалить операцию</button>`:
+          `<button class="btn ghost" style="margin-top:10px" onclick="Quick.open()">⚡ Быстрый ввод текстом</button>`}
+    `);
+    setTimeout(()=>$('txA')&&$('txA').focus(),120);
+  },
+  setType(t){ AddTx.type=t; $('ttExp').classList.toggle('on',t==='expense'); $('ttInc').classList.toggle('on',t==='income');
+    $('txCatWrap').classList.toggle('hide',t==='income'); },
+  setCat(c){ AddTx.cat=c; document.querySelectorAll('#txCats .cat-cell').forEach(e=>e.classList.toggle('on',e.dataset.c===c)); haptic(); },
+  async save(){
+    const a=parseFloat($('txA').value);
+    if(!(a>0)) return toast('Введите сумму','err');
+    const rec = { type:AddTx.type, amount:a, title:$('txT').value.trim()|| (AddTx.type==='income'?'Доход':catOf(AddTx.cat).n),
+      categoryId:AddTx.type==='income'?'salary':AddTx.cat, accountId:$('txAcc').value, date:$('txD').value||today(),
+      source:'manual', updatedAt:Date.now() };
+    try{
+      if(AddTx.editing) await DB.upd('transactions/'+AddTx.editing, rec);
+      else { rec.createdAt=Date.now(); await DB.push('transactions', rec); }
+      Sheet.close(); haptic(); toast(AddTx.editing?'Операция обновлена':'Сохранено ✓','ok');
+    }catch(e){ toast('Не удалось сохранить расход. Проверьте интернет и попробуйте ещё раз.','err'); }
+  },
+  del(id){ Sheet.confirm('Удалить операцию?','Действие нельзя отменить.','Удалить',async()=>{
+      try{ await DB.del('transactions/'+id); toast('Удалено'); }catch(e){ toast('Ошибка удаления','err'); } }); }
+};
+
+/* ===================== QUICK EXPENSE ===================== */
+const KW = {
+  food:['обед','ужин','завтрак','кафе','ресторан','шаурма','пицца','бургер','кофе','чай','столов','фастфуд','самса'],
+  grocery:['продукт','магазин','базар','рынок','хлеб','молоко','мясо','овощ','фрукт','сахар','рис','масло'],
+  transport:['такси','автобус','маршрут','бензин','топлив','проезд','метро','парков'],
+  clothes:['брюки','рубашк','обув','куртк','джинс','плать','кроссов','одежд','футболк','костюм','туфл'],
+  mobile:['связь','интернет','телефон','мобиль','баланс','трафик','wifi'],
+  housing:['квартир','аренда','жиль','ипотек','общежит'],
+  utility:['свет','газ','вода','коммунал','электр','отоплен'],
+  health:['аптек','лекарств','врач','больниц','стомат','анализ','медиц'],
+  fun:['кино','игр','развлеч','клуб','подписк','netflix','spotify','боулинг'],
+  edu:['курс','учеб','книг','обучен','школ','универ','репетит'],
+  credit:['кредит','займ','рассрочк','долг'],
+  tax:['налог','патент','пошлин','штраф'],
+  travel:['билет','поездк','отель','путешеств','виза','самолет','самолёт'],
+  gift:['подарок','подарк','цвет','сувенир'],
+  shop:['покупк','техник','телевизор','ноутбук','наушник','зарядк']
+};
+const Quick = {
+  open(){
+    Sheet.open(`<h3>⚡ Быстрый ввод</h3>
+      <p class="mut" style="margin:0 0 14px;font-size:14px">Напишите обычным текстом, например:<br><b>«Купил брюки за 500 сомони»</b></p>
+      <textarea class="inp" id="qText" placeholder="Купил брюки за 500 сомони"></textarea>
+      <button class="btn" style="margin-top:12px" onclick="Quick.parse()">РАСПОЗНАТЬ</button>`);
+    setTimeout(()=>$('qText')&&$('qText').focus(),120);
+  },
+  detect(text){
+    const s=' '+text.toLowerCase().replace(/ё/g,'е')+' ';
+    const nums = s.match(/\d+(?:[.,]\d+)?/g)||[];
+    let amount = nums.length? parseFloat(nums[nums.length-1].replace(',','.')) : 0;
+    let cat='other', hit='';
+    for(const [c,words] of Object.entries(KW)) for(const w of words)
+      if(s.includes(w.replace(/ё/g,'е'))){ cat=c; hit=w; break; }
+    let title = text.replace(/за\s*\d+[^\s]*/gi,'').replace(/\d+(?:[.,]\d+)?/g,'')
+      .replace(/сомони|сум|руб(лей|ля)?|тенге|доллар(ов|а)?|евро|с\.|тжс|usd|eur|rub/gi,'')
+      .replace(/^(купил[аи]?|потратил[аи]?|оплатил[аи]?|заплатил[аи]?|взял[аи]?|потратили)\s*/i,'')
+      .replace(/\s+/g,' ').trim();
+    if(!title) title = catOf(cat).n;
+    title = title.charAt(0).toUpperCase()+title.slice(1);
+    let date = today();
+    if(/вчера/i.test(s)) date = iso(new Date(Date.now()-86400000));
+    return {amount,categoryId:cat,title,date};
+  },
+  parse(){
+    const txt=$('qText').value.trim();
+    if(!txt) return toast('Введите текст','err');
+    const r = Quick.detect(txt);
+    if(!(r.amount>0)) return toast('Не удалось определить сумму. Укажите число.','err');
+    window.__quick = r;
+    const c=catOf(r.categoryId);
+    Sheet.open(`<h3>Подтвердите операцию</h3>
+      <div class="card" style="text-align:center;padding:24px">
+        <div style="font-size:40px">${c.e}</div>
+        <div style="font-weight:700;font-size:18px;margin-top:6px">${esc(r.title)}</div>
+        <div class="amount" style="font-size:30px;margin:8px 0;color:var(--err)">−${money(r.amount)}</div>
+        <div class="mut" style="font-size:13.5px">${esc(c.n)} · ${dLabel(r.date)}</div>
+      </div>
+      <div class="row" style="gap:10px;margin-top:16px">
+        <button class="btn ghost" onclick="Quick.editIt()">Изменить</button>
+        <button class="btn" onclick="Quick.save()">Сохранить</button>
+      </div>
+      <p class="mut3" style="font-size:11.5px;text-align:center;margin-top:12px">Операция будет записана только после вашего подтверждения.</p>`);
+  },
+  editIt(){ const r=window.__quick; AddTx.open(); setTimeout(()=>{ $('txA').value=r.amount; $('txT').value=r.title;
+      $('txD').value=r.date; AddTx.setCat(r.categoryId); },80); },
+  async save(){
+    const r=window.__quick;
+    try{ await DB.push('transactions',{type:'expense',amount:r.amount,title:r.title,categoryId:r.categoryId,
+      accountId:accounts()[0].id,date:r.date,source:'quick_text',createdAt:Date.now()});
+      Sheet.close(); haptic(); toast('Сохранено ✓','ok');
+    }catch(e){ toast('Не удалось сохранить. Проверьте интернет.','err'); }
+  }
+};
+
+/* ===================== РЕГУЛЯРНЫЕ ПЛАТЕЖИ ===================== */
+const Pay = {
+  render(){
+    const list = payInstances(S.payFilter);
+    document.querySelectorAll('#payFilters .chip').forEach(c=>c.classList.toggle('on',c.dataset.f===S.payFilter));
+    if(!list.length){ $('payBody').innerHTML=`<div class="card empty" style="margin-top:14px"><div class="e-ico">🔔</div>
+      Платежей в этом периоде нет.<button class="btn soft sm" style="margin-top:12px" onclick="Pay.edit()">＋ Создать платёж</button></div>`; return; }
+    const grp = {overdue:[],pending:[],paid:[]}; list.forEach(p=>grp[p.status].push(p));
+    const sect = (t,arr,badge)=> arr.length?`<div class="sec-title">${t}</div><div class="card" style="padding:6px 18px">${arr.map(p=>{
+      const c=catOf(p.categoryId);
+      return `<div class="list-item">
+        <div class="ico">${c.e}</div>
+        <div class="grow" style="min-width:0"><div style="font-weight:600" class="trunc">${esc(p.title)}</div>
+          <div class="mut" style="font-size:12px">${esc(c.n)} · ${dLabel(p.due)}</div></div>
+        <div style="text-align:right"><div class="amount">${fmt(p.amount)}</div>
+        ${p.status==='paid'?`<span class="badge b-ok">🟢 Оплачен</span>`:
+          `<button class="badge ${p.status==='overdue'?'b-err':'b-warn'}" onclick="Pay.markPaid('${p.rid}','${p.due}')">ОПЛАЧЕНО</button>`}</div>
+        <button class="icon-btn" onclick="Pay.edit('${p.rid}')">⋯</button>
+      </div>`;}).join('')}</div>`:'';
+    $('payBody').innerHTML = sect('🔴 Просроченные',grp.overdue)+sect('🟡 Предстоящие',grp.pending)+sect('🟢 Оплаченные',grp.paid);
+  },
+  edit(id){
+    const r = id ? recurring().find(x=>x.id===id) : null;
+    Sheet.open(`<h3>${r?'Регулярный платёж':'Новый платёж'}</h3>
+      <div class="field"><label>Название</label><input class="inp" id="rpT" value="${esc(r?r.title:'')}" placeholder="Квартира"></div>
+      <div class="field"><label>Сумма</label><input class="inp" id="rpA" type="number" inputmode="decimal" value="${r?r.amount:''}" placeholder="2000"></div>
+      <div class="field"><label>Категория</label><select class="inp" id="rpC">${allCats().map(c=>`<option value="${c.id}" ${(r?r.categoryId:'housing')===c.id?'selected':''}>${c.e} ${esc(c.n)}</option>`).join('')}</select></div>
+      <div class="field"><label>Дата платежа</label><input class="inp" id="rpD" type="date" value="${r?r.startDate:today()}"></div>
+      <div class="field"><label>Повтор</label><select class="inp" id="rpF">${Object.entries(FREQ).map(([k,v])=>`<option value="${k}" ${(r?r.frequency:'monthly')===k?'selected':''}>${v}</option>`).join('')}</select></div>
+      <div class="field"><label>Напоминание</label><select class="inp" id="rpR">
+        ${[[7,'За 7 дней'],[3,'За 3 дня'],[1,'За 1 день'],[0,'В день платежа']].map(([k,v])=>`<option value="${k}" ${(r?r.reminderDays:1)==k?'selected':''}>${v}</option>`).join('')}</select></div>
+      <button class="btn" onclick="Pay.save('${id||''}')">СОХРАНИТЬ</button>
+      ${r?`<button class="btn danger" style="margin-top:10px" onclick="Pay.del('${id}')">Удалить платёж</button>`:''}`);
+  },
+  async save(id){
+    const t=$('rpT').value.trim(), a=parseFloat($('rpA').value);
+    if(!t||!(a>0)) return toast('Укажите название и сумму','err');
+    const rec={title:t,amount:a,categoryId:$('rpC').value,startDate:$('rpD').value||today(),
+      frequency:$('rpF').value,reminderDays:+$('rpR').value,isActive:true,updatedAt:Date.now()};
+    try{ if(id) await DB.upd('recurring/'+id,rec); else {rec.createdAt=Date.now(); await DB.push('recurring',rec);}
+      Sheet.close(); toast('Платёж сохранён','ok');
+    }catch(e){ toast('Не удалось сохранить платёж.','err'); }
+  },
+  del(id){ Sheet.confirm('Удалить платёж?','Напоминания больше не будут приходить.','Удалить',async()=>{
+      await DB.del('recurring/'+id); Sheet.close(); toast('Удалено'); }); },
+  async markPaid(rid,due){
+    const r = recurring().find(x=>x.id===rid); if(!r) return;
+    try{
+      await DB.push('transactions',{type:'expense',amount:r.amount,title:r.title,categoryId:r.categoryId,
+        accountId:accounts()[0].id,date:due,source:'recurring',createdAt:Date.now()});
+      await DB.set('recurring/'+rid+'/paid/'+due,true);
+      haptic(); toast('Платёж отмечен как оплаченный ✓','ok');
+    }catch(e){ toast('Не удалось отметить платёж.','err'); }
+  }
+};
+
+/* ===================== ИСТОРИЯ ===================== */
+const Hist = {
+  render(){
+    document.querySelectorAll('#hsFilters .chip').forEach(c=>c.classList.toggle('on',c.dataset.f===S.hsFilter));
+    let list = txs(); if(S.hsFilter!=='all') list=list.filter(t=>t.type===S.hsFilter);
+    if(!list.length){ $('hsBody').innerHTML=`<div class="card empty" style="margin-top:14px"><div class="e-ico">🧾</div>Здесь пока нет операций.</div>`; return; }
+    const byDate={}; list.forEach(t=>{ (byDate[t.date]=byDate[t.date]||[]).push(t); });
+    $('hsBody').innerHTML = Object.keys(byDate).sort((a,b)=>b.localeCompare(a)).map(d=>{
+      const sum = byDate[d].reduce((s,t)=>s+(t.type==='income'?+t.amount:-t.amount),0);
+      return `<div class="row sp" style="margin:18px 4px 8px"><b style="font-size:13.5px">${dLabel(d)}</b>
+        <span class="mut amount" style="font-size:13px">${sum>=0?'+':''}${fmt(sum)}</span></div>
+        <div class="card" style="padding:6px 18px">${byDate[d].map(txRow).join('')}</div>`;
+    }).join('');
+  }
+};
+
+/* ===================== ПОИСК ===================== */
+const Search = {
+  run(){
+    const q = $('sQ').value.trim().toLowerCase();
+    if(q.length<2){ $('sBody').innerHTML=`<div class="empty" style="padding:50px 20px"><div class="e-ico">🔎</div>Введите запрос: название расхода, платежа, категории или цели.</div>`; return; }
+    const tx = txs().filter(t=>(t.title||'').toLowerCase().includes(q)||catOf(t.categoryId).n.toLowerCase().includes(q));
+    const py = payInstances('all').filter(p=>p.title.toLowerCase().includes(q));
+    const gl = goalsList().filter(g=>(g.name||'').toLowerCase().includes(q));
+    const ct = allCats().filter(c=>c.n.toLowerCase().includes(q));
+    let h='';
+    if(tx.length) h+=`<div class="sec-title">Операции (${tx.length})</div><div class="card" style="padding:6px 18px">${tx.slice(0,30).map(txRow).join('')}</div>`;
+    if(py.length) h+=`<div class="sec-title">Платежи</div><div class="card" style="padding:6px 18px">${py.slice(0,15).map(p=>`
+      <div class="list-item"><div class="ico">${catOf(p.categoryId).e}</div><div class="grow"><div style="font-weight:600">${esc(p.title)}</div>
+      <div class="mut" style="font-size:12px">${dLabel(p.due)}</div></div><div class="amount">${fmt(p.amount)}</div></div>`).join('')}</div>`;
+    if(gl.length) h+=`<div class="sec-title">Цели</div><div class="card" style="padding:6px 18px">${gl.map(g=>`
+      <div class="list-item" onclick="Nav.go('goals')"><div class="ico">🎯</div><div class="grow"><div style="font-weight:600">${esc(g.name)}</div>
+      <div class="mut" style="font-size:12px">${fmt(g.currentAmount||0)} / ${fmt(g.targetAmount)}</div></div></div>`).join('')}</div>`;
+    if(ct.length) h+=`<div class="sec-title">Категории</div><div class="card" style="padding:6px 18px">${ct.map(c=>`
+      <div class="list-item"><div class="ico">${c.e}</div><div class="grow" style="font-weight:600">${esc(c.n)}</div>
+      <div class="amount mut">${fmt(totals('month').byCat[c.id]||0)}</div></div>`).join('')}</div>`;
+    $('sBody').innerHTML = h || `<div class="empty" style="padding:50px 20px"><div class="e-ico">🤷</div>Ничего не найдено по запросу «${esc(q)}»</div>`;
+  }
+};
+
+/* ===================== АНАЛИТИКА ===================== */
+const PALETTE = ['#00D09C','#4C8DFF','#F5A524','#F0435A','#A855F7','#14B8A6','#FB7185','#84CC16','#38BDF8','#FBBF24'];
+const An = {
+  render(){
+    document.querySelectorAll('#anSeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===S.anPeriod));
+    const p=S.anPeriod, t=totals(p), rest=t.inc-t.exp;
+    const cats = Object.entries(t.byCat).sort((a,b)=>b[1]-a[1]);
+    const total = cats.reduce((s,c)=>s+c[1],0);
+
+    /* donut */
+    let off=0; const R=52,C=2*Math.PI*R;
+    const donut = total>0 ? `<svg viewBox="0 0 140 140" style="width:150px;height:150px;flex:none">
+      ${cats.map((c,i)=>{ const frac=c[1]/total, len=C*frac, d=`<circle cx="70" cy="70" r="${R}" fill="none"
+        stroke="${PALETTE[i%PALETTE.length]}" stroke-width="16" stroke-dasharray="${len-2} ${C-len+2}"
+        stroke-dashoffset="${-off}" transform="rotate(-90 70 70)" stroke-linecap="round"/>`; off+=len; return d; }).join('')}
+      <text x="70" y="66" text-anchor="middle" fill="var(--txt3)" font-size="9" font-family="inherit">РАСХОД</text>
+      <text x="70" y="82" text-anchor="middle" fill="var(--txt)" font-size="15" font-weight="700" font-family="inherit">${fmt(total)}</text>
+    </svg>` : '';
+
+    /* bars по дням/месяцам */
+    let bars='', barTitle='';
+    if(p==='year'){
+      barTitle='Расходы по месяцам';
+      const y=new Date().getFullYear(), m=Array(12).fill(0);
+      txs().forEach(x=>{ if(x.type==='expense'&&x.date.slice(0,4)==String(y)) m[+x.date.slice(5,7)-1]+=+x.amount||0; });
+      const mx=Math.max(...m,1);
+      bars=m.map((v,i)=>`<div class="b" title="${fmt(v)}"><i style="height:${Math.max(3,v/mx*100)}%"></i><span>${MONS[i]}</span></div>`).join('');
+    } else {
+      const n = p==='day'?7:p==='week'?7:new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
+      barTitle = p==='month'?'Расходы по дням месяца':'Расходы за 7 дней';
+      const arr=[];
+      for(let i=0;i<n;i++){
+        let d;
+        if(p==='month') d=new Date(new Date().getFullYear(),new Date().getMonth(),i+1);
+        else d=new Date(Date.now()-(n-1-i)*86400000);
+        const k=iso(d); const v=txs().filter(x=>x.type==='expense'&&x.date===k).reduce((s,x)=>s+ +x.amount,0);
+        arr.push({k,v,l:p==='month'?(i+1)%5===0||i===0?String(i+1):'':String(d.getDate())});
+      }
+      const mx=Math.max(...arr.map(a=>a.v),1);
+      bars=arr.map(a=>`<div class="b" title="${fmt(a.v)}"><i style="height:${Math.max(3,a.v/mx*100)}%"></i><span>${a.l}</span></div>`).join('');
+    }
+
+    const buds = budgetState();
+    $('anBody').innerHTML = `
+      <div class="card" style="margin-top:16px">
+        <div class="row" style="gap:10px">
+          <div class="grow"><div class="mut" style="font-size:12px">ДОХОД</div><div class="amount" style="font-size:19px;color:var(--ok)">${fmt(t.inc)}</div></div>
+          <div class="grow"><div class="mut" style="font-size:12px">РАСХОД</div><div class="amount" style="font-size:19px;color:var(--err)">${fmt(t.exp)}</div></div>
+          <div class="grow"><div class="mut" style="font-size:12px">ОСТАТОК</div><div class="amount" style="font-size:19px">${fmt(rest)}</div></div>
+        </div>
+      </div>
+      ${total>0?`<div class="sec-title">Расходы по категориям</div>
+      <div class="card"><div class="row" style="gap:14px;align-items:center">
+        ${donut}
+        <div class="grow" style="min-width:0">${cats.slice(0,6).map((c,i)=>`
+          <div class="legend"><span class="dot" style="background:${PALETTE[i%PALETTE.length]}"></span>
+          <span class="grow trunc" style="font-size:13px">${catOf(c[0]).e} ${esc(catOf(c[0]).n)}</span>
+          <b class="amount" style="font-size:13px">${Math.round(c[1]/total*100)}%</b></div>`).join('')}
+        </div></div>
+        <div style="margin-top:10px">${cats.map((c,i)=>`<div class="row sp" style="padding:7px 0;border-top:1px solid var(--line)">
+          <span style="font-size:13.5px">${catOf(c[0]).e} ${esc(catOf(c[0]).n)}</span><b class="amount" style="font-size:13.5px">${money(c[1])}</b></div>`).join('')}</div>
+      </div>`:`<div class="card empty" style="margin-top:16px"><div class="e-ico">📊</div>Нет расходов за выбранный период.</div>`}
+      <div class="sec-title">${barTitle}</div>
+      <div class="card"><div class="bars">${bars}</div></div>
+      ${buds.length?`<div class="sec-title">Бюджетные лимиты</div><div class="card">${buds.map(b=>{
+        const c=catOf(b.cid), cls=b.pct>=100?'err':b.pct>=80?'warn':'';
+        return `<div style="padding:9px 0">
+          <div class="row sp" style="margin-bottom:7px"><span style="font-size:13.5px">${c.e} ${esc(c.n)}</span>
+          <span class="amount" style="font-size:13px;color:${b.pct>=100?'var(--err)':b.pct>=80?'var(--warn)':'var(--txt2)'}">${fmt(b.used)} / ${fmt(b.limit)}</span></div>
+          <div class="prog ${cls}"><i style="width:${Math.min(100,b.pct)}%"></i></div></div>`;}).join('')}
+        <button class="btn ghost sm" style="width:100%;margin-top:12px" onclick="Sub.budgets()">Настроить лимиты</button></div>`:
+        `<div class="card" style="margin-top:16px;text-align:center"><div class="mut" style="font-size:14px;margin-bottom:10px">Установите лимиты по категориям, чтобы контролировать траты.</div>
+        <button class="btn soft sm" onclick="Sub.budgets()">＋ Создать лимит</button></div>`}
+      <div class="sec-title">Цели</div>
+      <div class="card">${goalsList().length?goalsList().map(g=>{const pct=Math.min(100,Math.round((+g.currentAmount||0)/(+g.targetAmount||1)*100));
+        return `<div style="padding:8px 0"><div class="row sp" style="margin-bottom:7px"><span style="font-size:13.5px">🎯 ${esc(g.name)}</span>
+        <b style="font-size:13px;color:var(--accent)">${pct}%</b></div><div class="prog"><i style="width:${pct}%"></i></div></div>`;}).join('')
+        :'<div class="mut" style="text-align:center;font-size:14px">Целей пока нет</div>'}</div>`;
+  }
+};
+
+/* ===================== ЦЕЛИ ===================== */
+const Goals = {
+  render(){
+    const l = goalsList();
+    if(!l.length){ $('goalsBody').innerHTML=`<div class="card empty"><div class="e-ico">🎯</div>Создайте первую финансовую цель.
+      <button class="btn soft sm" style="margin-top:12px" onclick="Goals.edit()">＋ Создать цель</button></div>`; return; }
+    $('goalsBody').innerHTML = l.map(g=>{
+      const cur_=+g.currentAmount||0, tgt=+g.targetAmount||1, pct=Math.min(100,Math.round(cur_/tgt*100)), left=Math.max(0,tgt-cur_);
+      let per='';
+      if(g.deadline){ const days=daysBetween(today(),g.deadline);
+        const months=Math.max(1,Math.ceil(days/30));
+        per = days<0?`<span style="color:var(--err)">Срок истёк</span>`
+          :`Откладывайте <b style="color:var(--accent)">${money(left/months)}</b> в месяц · осталось ${days} дн.`;
+      }
+      return `<div class="card">
+        <div class="row sp"><div class="row grow" style="min-width:0"><div class="ico">🎯</div>
+          <div class="grow" style="min-width:0"><div style="font-weight:700" class="trunc">${esc(g.name)}</div>
+          <div class="mut" style="font-size:12.5px">${g.deadline?'до '+dLabel(g.deadline):'без срока'}</div></div></div>
+          <button class="icon-btn" onclick="Goals.edit('${g.id}')">⋯</button></div>
+        <div class="amount" style="font-size:22px;margin:12px 0 4px">${money(tgt)}</div>
+        <div class="prog" style="margin:8px 0"><i style="width:${pct}%"></i></div>
+        <div class="row sp mut" style="font-size:12.5px"><span>${fmt(cur_)} / ${fmt(tgt)}</span><b style="color:var(--accent)">${pct}%</b></div>
+        <div class="mut" style="font-size:12.5px;margin-top:8px">Осталось: <b>${money(left)}</b></div>
+        ${per?`<div class="mut" style="font-size:12.5px;margin-top:4px">${per}</div>`:''}
+        <div class="row" style="gap:10px;margin-top:14px">
+          <button class="btn soft sm" style="flex:1" onclick="Goals.deposit('${g.id}')">＋ Пополнить</button>
+          <button class="btn ghost sm" style="flex:1" onclick="Goals.edit('${g.id}')">Изменить</button>
+        </div></div>`;
+    }).join('');
+  },
+  edit(id){
+    const g = id? goalsList().find(x=>x.id===id):null;
+    Sheet.open(`<h3>${g?'Цель':'Новая цель'}</h3>
+      <div class="field"><label>Название</label><input class="inp" id="glN" value="${esc(g?g.name:'')}" placeholder="Новый ноутбук"></div>
+      <div class="field"><label>Целевая сумма</label><input class="inp" id="glT" type="number" inputmode="decimal" value="${g?g.targetAmount:''}" placeholder="20000"></div>
+      <div class="field"><label>${g?'Накоплено':'Начальная сумма'}</label><input class="inp" id="glC" type="number" inputmode="decimal" value="${g?(g.currentAmount||0):''}" placeholder="2000"></div>
+      <div class="field"><label>Дедлайн</label><input class="inp" id="glD" type="date" value="${g&&g.deadline?g.deadline:''}"></div>
+      <button class="btn" onclick="Goals.save('${id||''}')">СОХРАНИТЬ</button>
+      ${g?`<button class="btn danger" style="margin-top:10px" onclick="Goals.del('${id}')">Удалить цель</button>`:''}`);
+  },
+  async save(id){
+    const n=$('glN').value.trim(), t=parseFloat($('glT').value);
+    if(!n||!(t>0)) return toast('Укажите название и целевую сумму','err');
+    const rec={name:n,targetAmount:t,currentAmount:parseFloat($('glC').value)||0,deadline:$('glD').value||null,updatedAt:Date.now()};
+    try{ if(id) await DB.upd('goals/'+id,rec); else {rec.createdAt=Date.now(); await DB.push('goals',rec);}
+      Sheet.close(); toast('Цель сохранена','ok'); }catch(e){ toast('Не удалось сохранить цель.','err'); }
+  },
+  del(id){ Sheet.confirm('Удалить цель?','Прогресс будет потерян.','Удалить',async()=>{ await DB.del('goals/'+id); Sheet.close(); toast('Удалено'); }); },
+  deposit(id){
+    const g=goalsList().find(x=>x.id===id);
+    Sheet.open(`<h3>Пополнить «${esc(g.name)}»</h3>
+      <div class="field"><label>Сумма пополнения</label><input class="inp" id="gdA" type="number" inputmode="decimal" placeholder="500" style="font-size:22px;font-weight:700"></div>
+      <label class="row" style="gap:10px;margin:6px 4px 16px"><input type="checkbox" id="gdTx" checked style="width:20px;height:20px;accent-color:var(--accent)">
+        <span class="mut" style="font-size:13.5px">Записать как расход «Накопления»</span></label>
+      <button class="btn" onclick="Goals.saveDeposit('${id}')">ПОПОЛНИТЬ</button>`);
+  },
+  async saveDeposit(id){
+    const a=parseFloat($('gdA').value); if(!(a>0)) return toast('Введите сумму','err');
+    const g=goalsList().find(x=>x.id===id);
+    try{
+      await DB.set('goals/'+id+'/currentAmount',(+g.currentAmount||0)+a);
+      if($('gdTx').checked) await DB.push('transactions',{type:'expense',amount:a,title:'Накопления: '+g.name,
+        categoryId:'other',accountId:accounts()[0].id,date:today(),source:'manual',createdAt:Date.now()});
+      Sheet.close(); haptic(); toast('Цель пополнена ✓','ok');
+    }catch(e){ toast('Не удалось пополнить цель.','err'); }
+  }
+};
+
+/* ===================== ПРОФИЛЬ ===================== */
+const Profile = {
+  render(){
+    const st = (S.data&&S.data.settings)||{}, sec=(S.data&&S.data.security)||{}, tg=(S.data&&S.data.telegram)||{};
+    const inc = (S.data&&S.data.income&&S.data.income.main)||{};
+    const item=(e,t,v,fn)=>`<div class="list-item" onclick="${fn}"><div class="ico">${e}</div>
+      <div class="grow"><div style="font-weight:600;font-size:14.5px">${t}</div></div>
+      <span class="mut" style="font-size:13px">${v||''}</span><span class="mut3">›</span></div>`;
+    $('profBody').innerHTML = `
+      <div class="sec-title">Финансы</div>
+      <div class="card" style="padding:6px 18px">
+        ${item('💵','Доход', inc.amount?money(inc.amount):'не задан','Sub.income()')}
+        ${item('💱','Валюта', cur(),'Sub.currency()')}
+        ${item('🏦','Счета', accounts().length+'','Sub.accounts()')}
+        ${item('🏷️','Категории', allCats().length+'','Sub.categories()')}
+        ${item('📉','Бюджетные лимиты', budgetState().length+'','Sub.budgets()')}
+        ${item('🔔','Регулярные платежи', recurring().length+'',"Nav.go('payments')")}
+      </div>
+      <div class="sec-title">Приложение</div>
+      <div class="card" style="padding:6px 18px">
+        ${item('🤖','AI-помощник','', "Nav.go('ai')")}
+        ${item('💬','Telegram', tg.chatId?'подключён':'не подключён','Sub.telegram()')}
+        ${item('🔔','Уведомления', st.notifications===false?'выкл':'вкл','Sub.notif()')}
+        ${item('🌙','Тема', ({light:'Светлая',dark:'Тёмная',system:'Системная'})[localStorage.mb_theme||'system'],'Sub.theme()')}
+        ${item('🔒','Безопасность', sec.pinEnabled?'PIN включён':'выкл','Sub.security()')}
+        ${item('📊','Экспорт данных','','Sub.export()')}
+      </div>
+      <div class="sec-title">Аккаунт</div>
+      <div class="card" style="padding:6px 18px">
+        ${item('📄','Политика конфиденциальности','','Sub.privacy()')}
+        ${item('🚪','Выйти','','Auth.logout()')}
+        ${item('🗑️','Удалить аккаунт','','Profile.deleteAcc()')}
+      </div>`;
+  },
+  editInfo(){
+    const p=S.data.profile||{};
+    Sheet.open(`<h3>Личные данные</h3>
+      <div class="field"><label>Имя</label><input class="inp" id="piF" value="${esc(p.firstName)}"></div>
+      <div class="field"><label>Фамилия</label><input class="inp" id="piL" value="${esc(p.lastName)}"></div>
+      <div class="field"><label>Отчество</label><input class="inp" id="piM" value="${esc(p.middleName||'')}"></div>
+      <div class="field"><label>Дата рождения</label><input class="inp" id="piB" type="date" value="${p.birthDate||''}"></div>
+      <div class="field"><label>Пол</label><select class="inp" id="piG"><option value="">—</option>
+        <option value="male" ${p.gender==='male'?'selected':''}>Мужской</option>
+        <option value="female" ${p.gender==='female'?'selected':''}>Женский</option></select></div>
+      <div class="field"><label>Телефон</label><input class="inp" value="${esc(p.phone)}" disabled style="opacity:.6"></div>
+      <button class="btn" onclick="Profile.saveInfo()">СОХРАНИТЬ</button>`);
+  },
+  async saveInfo(){
+    await DB.upd('profile',{firstName:$('piF').value.trim(),lastName:$('piL').value.trim(),
+      middleName:$('piM').value.trim()||null,birthDate:$('piB').value||null,gender:$('piG').value||null,updatedAt:Date.now()});
+    Sheet.close(); toast('Сохранено','ok');
+  },
+  deleteAcc(){
+    Sheet.confirm('Удалить аккаунт?','Все финансовые данные будут безвозвратно удалены.','Удалить навсегда',async()=>{
+      try{ await DB.ref().remove(); await auth.currentUser.delete(); toast('Аккаунт удалён'); }
+      catch(e){ toast('Для удаления нужно недавно выполнить вход. Выйдите и войдите снова.','err'); }
+    });
+  }
+};
+
+/* ===================== ПОДРАЗДЕЛЫ ===================== */
+function subShell(title,html){
+  $('subBody').innerHTML = `<div class="row" style="gap:10px;margin-bottom:16px">
+    <button class="icon-btn" onclick="Nav.go('profile')">‹</button><h2 style="margin:0;font-size:21px;font-weight:800">${title}</h2></div>${html}`;
+  Nav.go('sub',true);
+}
+const Sub = {
+  income(){
+    const i=(S.data&&S.data.income&&S.data.income.main)||{};
+    subShell('💵 Доход',`<div class="card">
+      <div class="field"><label>Название</label><input class="inp" id="icN" value="${esc(i.name||'Зарплата')}"></div>
+      <div class="field"><label>Сумма</label><input class="inp" id="icA" type="number" inputmode="decimal" value="${i.amount||''}" placeholder="8000"></div>
+      <div class="field"><label>Периодичность</label><select class="inp" id="icF">
+        <option value="monthly" ${i.frequency==='monthly'?'selected':''}>Каждый месяц</option>
+        <option value="weekly" ${i.frequency==='weekly'?'selected':''}>Каждую неделю</option>
+        <option value="none" ${i.frequency==='none'?'selected':''}>Нерегулярно</option></select></div>
+      <div class="field"><label>Число выплаты</label><select class="inp" id="icD">${Array.from({length:31},(_,k)=>`<option value="${k+1}" ${(i.paymentDay||5)===k+1?'selected':''}>${k+1} число</option>`).join('')}</select></div>
+      <button class="btn" onclick="Sub.saveIncome()">СОХРАНИТЬ</button>
+      <p class="mut3" style="font-size:12px;margin:12px 4px 0">Доход автоматически начисляется в баланс в указанный день.</p></div>`);
+  },
+  async saveIncome(){
+    const a=parseFloat($('icA').value)||0;
+    const prev=(S.data.income&&S.data.income.main)||{};
+    await DB.set('income/main',{name:$('icN').value.trim()||'Зарплата',amount:a,currency:cur(),
+      frequency:$('icF').value,paymentDay:+$('icD').value,isActive:a>0,
+      startDate:prev.startDate||today(),createdAt:prev.createdAt||Date.now(),updatedAt:Date.now()});
+    toast('Доход сохранён','ok'); Nav.go('profile');
+  },
+  currency(){
+    subShell('💱 Валюта',`<div class="card" style="padding:6px 18px">${Object.entries(CUR).map(([k,v])=>`
+      <div class="list-item" onclick="Sub.setCurrency('${k}')"><div class="ico">${v}</div>
+      <div class="grow" style="font-weight:600">${k}</div>${cur()===k?'<span style="color:var(--accent)">✓</span>':''}</div>`).join('')}</div>
+      <p class="mut3" style="font-size:12px;margin:12px 6px">Смена валюты меняет отображение символа; суммы не конвертируются.</p>`);
+  },
+  async setCurrency(c){ await DB.set('profile/currency',c); toast('Валюта: '+c,'ok'); Sub.currency(); },
+  accounts(){
+    subShell('🏦 Счета',`<div class="card" style="padding:6px 18px">${accounts().map(a=>`
+      <div class="list-item"><div class="ico">${(ACC_TYPES[a.type]||{e:'💵'}).e}</div>
+      <div class="grow"><div style="font-weight:600">${esc(a.name)}</div>
+      <div class="mut" style="font-size:12px">${(ACC_TYPES[a.type]||{n:''}).n} · старт ${fmt(a.initialBalance||0)}</div></div>
+      ${a.id!=='cash'?`<button class="icon-btn" onclick="Sub.delAccount('${a.id}')">✕</button>`:''}</div>`).join('')}</div>
+      <button class="btn soft" style="margin-top:14px" onclick="Sub.addAccount()">＋ Добавить счёт</button>`);
+  },
+  addAccount(){
+    Sheet.open(`<h3>Новый счёт</h3>
+      <div class="field"><label>Название</label><input class="inp" id="acN" placeholder="Карта Amonatbonk"></div>
+      <div class="field"><label>Тип</label><select class="inp" id="acT">${Object.entries(ACC_TYPES).map(([k,v])=>`<option value="${k}">${v.e} ${v.n}</option>`).join('')}</select></div>
+      <div class="field"><label>Начальный баланс</label><input class="inp" id="acB" type="number" inputmode="decimal" placeholder="0"></div>
+      <button class="btn" onclick="Sub.saveAccount()">ДОБАВИТЬ</button>`);
+  },
+  async saveAccount(){
+    const n=$('acN').value.trim(); if(!n) return toast('Введите название','err');
+    await DB.push('accounts',{name:n,type:$('acT').value,initialBalance:parseFloat($('acB').value)||0,
+      currency:cur(),isActive:true,createdAt:Date.now()});
+    Sheet.close(); Sub.accounts(); toast('Счёт добавлен','ok');
+  },
+  delAccount(id){ Sheet.confirm('Удалить счёт?','Операции сохранятся в истории.','Удалить',async()=>{
+      await DB.del('accounts/'+id); Sheet.close(); Sub.accounts(); }); },
+  categories(){
+    const custom = obj(S.data&&S.data.categories);
+    subShell('🏷️ Категории',`<div class="sec-title" style="margin-top:0">Системные</div>
+      <div class="card" style="padding:6px 18px">${CATS.map(c=>`<div class="list-item"><div class="ico">${c.e}</div>
+        <div class="grow" style="font-weight:600">${esc(c.n)}</div><span class="mut3" style="font-size:12px">системная</span></div>`).join('')}</div>
+      <div class="sec-title">Мои категории</div>
+      <div class="card" style="padding:6px 18px">${custom.length?custom.map(c=>`<div class="list-item"><div class="ico">${c.icon}</div>
+        <div class="grow" style="font-weight:600">${esc(c.name)}</div>
+        <button class="icon-btn" onclick="Sub.delCat('${c.id}')">✕</button></div>`).join('')
+        :'<div class="mut" style="padding:14px 0;text-align:center;font-size:14px">Своих категорий пока нет</div>'}</div>
+      <button class="btn soft" style="margin-top:14px" onclick="Sub.addCat()">＋ Создать категорию</button>`);
+  },
+  addCat(){
+    Sheet.open(`<h3>Новая категория</h3>
+      <div class="field"><label>Название</label><input class="inp" id="ctN" placeholder="Спорт"></div>
+      <div class="field"><label>Иконка</label><input class="inp" id="ctE" value="🏷️" maxlength="4" style="font-size:22px;text-align:center"></div>
+      <div class="chips" style="flex-wrap:wrap;gap:6px;margin-bottom:14px">${'🏷️ 🏋️ ⚽ 🐾 🚗 🎨 🎵 💼 🧾 🍼 💅 🛠️ 🌱 🎓'.split(' ').map(e=>`<button class="chip" onclick="document.getElementById('ctE').value='${e}'" style="font-size:19px">${e}</button>`).join('')}</div>
+      <button class="btn" onclick="Sub.saveCat()">СОЗДАТЬ</button>`);
+  },
+  async saveCat(){
+    const n=$('ctN').value.trim(); if(!n) return toast('Введите название','err');
+    await DB.push('categories',{name:n,icon:$('ctE').value||'🏷️',type:'expense',isSystem:false,createdAt:Date.now()});
+    Sheet.close(); Sub.categories(); toast('Категория создана','ok');
+  },
+  delCat(id){ Sheet.confirm('Удалить категорию?','Операции останутся, но станут «Другое».','Удалить',async()=>{
+      await DB.del('categories/'+id); Sheet.close(); Sub.categories(); }); },
+  budgets(){
+    const b=(S.data&&S.data.budgets)||{}, m=totals('month').byCat;
+    subShell('📉 Бюджетные лимиты',`<p class="mut" style="margin:0 0 14px;font-size:13.5px">Лимит на месяц по каждой категории. При 80% придёт предупреждение.</p>
+      <div class="card" style="padding:6px 18px">${allCats().map(c=>{
+        const lim=b[c.id]&&+b[c.id].limit||0, used=m[c.id]||0, pct=lim?Math.round(used/lim*100):0;
+        return `<div class="list-item" onclick="Sub.setBudget('${c.id}')"><div class="ico">${c.e}</div>
+          <div class="grow"><div style="font-weight:600;font-size:14.5px">${esc(c.n)}</div>
+          ${lim?`<div class="prog ${pct>=100?'err':pct>=80?'warn':''}" style="height:6px;margin-top:6px"><i style="width:${Math.min(100,pct)}%"></i></div>`:''}</div>
+          <span class="mut amount" style="font-size:13px">${lim?fmt(used)+' / '+fmt(lim):'—'}</span><span class="mut3">›</span></div>`;}).join('')}</div>`);
+  },
+  setBudget(cid){
+    const b=(S.data&&S.data.budgets&&S.data.budgets[cid])||{}, c=catOf(cid);
+    Sheet.open(`<h3>${c.e} ${esc(c.n)}</h3>
+      <div class="field"><label>Лимит на месяц (0 — снять лимит)</label>
+      <input class="inp" id="bdL" type="number" inputmode="decimal" value="${b.limit||''}" placeholder="1000" style="font-size:20px;font-weight:700"></div>
+      <button class="btn" onclick="Sub.saveBudget('${cid}')">СОХРАНИТЬ</button>`);
+  },
+  async saveBudget(cid){
+    const l=parseFloat($('bdL').value)||0;
+    if(l>0) await DB.set('budgets/'+cid,{limit:l,period:'month',updatedAt:Date.now()});
+    else await DB.del('budgets/'+cid);
+    Sheet.close(); Sub.budgets(); toast('Лимит обновлён','ok');
+  },
+  notif(){
+    const st=(S.data&&S.data.settings)||{};
+    const sw=(k,t,d,v)=>`<div class="list-item"><div class="grow"><div style="font-weight:600;font-size:14.5px">${t}</div>
+      <div class="mut" style="font-size:12.5px">${d}</div></div>
+      <input type="checkbox" ${v?'checked':''} onchange="Sub.saveNotif('${k}',this.checked)" style="width:46px;height:27px;accent-color:var(--accent)"></div>`;
+    subShell('🔔 Уведомления',`<div class="card" style="padding:6px 18px">
+      ${sw('notifications','Все уведомления','Напоминания о платежах и лимитах',st.notifications!==false)}
+      ${sw('notifPayments','Платежи','«Завтра нужно оплатить квартиру»',st.notifPayments!==false)}
+      ${sw('notifLimits','Лимиты бюджета','«Вы потратили 80% лимита на еду»',st.notifLimits!==false)}
+      ${sw('notifGoals','Цели','«До цели осталось 5 000»',st.notifGoals!==false)}
+      ${sw('notifDaily','Ежедневный отчёт','Итоги дня вечером',st.notifDaily===true)}
+      </div>
+      <button class="btn ghost" style="margin-top:14px" onclick="Sub.testNotif()">Проверить уведомление</button>
+      <p class="mut3" style="font-size:12px;margin:12px 6px">В мобильной версии используется Firebase Cloud Messaging (FCM). В браузере показываются локальные уведомления.</p>`);
+  },
+  async saveNotif(k,v){ await DB.set('settings/'+k,v); S.data.settings=Object.assign({},S.data.settings,{[k]:v}); },
+  async testNotif(){
+    try{
+      if(!('Notification' in window)) return toast('Браузер не поддерживает уведомления','err');
+      const p = await Notification.requestPermission();
+      if(p!=='granted') return toast('Разрешение не выдано','err');
+      const np = nextPayment();
+      new Notification('МОЙ БЮДЖЕТ', {body: np? `🔔 ${np.title} — ${money(np.amount)} · ${dLabel(np.due)}` : 'Уведомления включены ✓', icon:''});
+    }catch(e){ toast('Не удалось показать уведомление','err'); }
+  },
+  theme(){
+    subShell('🌙 Тема',`<div class="card" style="padding:6px 18px">${[['light','☀️','Светлая'],['dark','🌙','Тёмная'],['system','⚙️','Как в системе']].map(([k,e,n])=>`
+      <div class="list-item" onclick="Theme.set('${k}');Sub.theme()"><div class="ico">${e}</div><div class="grow" style="font-weight:600">${n}</div>
+      ${(localStorage.mb_theme||'system')===k?'<span style="color:var(--accent)">✓</span>':''}</div>`).join('')}</div>`);
+  },
+  security(){
+    const sec=(S.data&&S.data.security)||{};
+    subShell('🔒 Безопасность',`<div class="card" style="padding:6px 18px">
+      <div class="list-item"><div class="ico">🔢</div><div class="grow"><div style="font-weight:600;font-size:14.5px">PIN-код</div>
+        <div class="mut" style="font-size:12.5px">Запрашивается при запуске</div></div>
+        <input type="checkbox" ${sec.pinEnabled?'checked':''} onchange="Sub.togglePin(this.checked)" style="width:46px;height:27px;accent-color:var(--accent)"></div>
+      ${sec.pinEnabled?`<div class="list-item" onclick="Lock.setup(true)"><div class="ico">✏️</div><div class="grow" style="font-weight:600;font-size:14.5px">Изменить PIN</div><span class="mut3">›</span></div>`:''}
+      <div class="list-item"><div class="ico">🫆</div><div class="grow"><div style="font-weight:600;font-size:14.5px">Биометрия</div>
+        <div class="mut" style="font-size:12.5px">Face ID / отпечаток (устройство)</div></div>
+        <input type="checkbox" ${sec.biometricEnabled?'checked':''} onchange="Sub.toggleBio(this.checked)" style="width:46px;height:27px;accent-color:var(--accent)"></div>
+      </div>
+      <p class="mut3" style="font-size:12px;margin:12px 6px">PIN не хранится в открытом виде — сохраняется только необратимый хэш SHA-256.</p>`);
+  },
+  togglePin(v){ if(v) Lock.setup(); else Sheet.confirm('Отключить PIN?','Приложение будет открываться без кода.','Отключить',async()=>{
+      await DB.set('security',{pinEnabled:false,pinHash:null,biometricEnabled:false}); Sheet.close(); Sub.security(); }); },
+  async toggleBio(v){
+    if(v && !(window.PublicKeyCredential)) { toast('Биометрия недоступна в этом браузере','err'); Sub.security(); return; }
+    await DB.set('security/biometricEnabled',v); Sub.security();
+  },
+  telegram(){
+    const tg=(S.data&&S.data.telegram)||{}, bot=tg.bot||{};
+    const linked = !!tg.chatId;
+    subShell('💬 Telegram',`
+      <div class="sec-title" style="margin-top:0">Шаг 1 · Токен бота</div>
+      <div class="card">
+        <p class="mut" style="margin:0 0 14px;font-size:13.5px">Создайте бота в <b>@BotFather</b> → команда <b>/newbot</b> → скопируйте токен вида <span style="font-family:monospace">123456:AA...</span></p>
+        <div class="field"><label>Имя бота (@username)</label><input class="inp" id="tgU" value="${esc(bot.username||'')}" placeholder="moy_budjet_bot"></div>
+        <div class="field"><label>Токен бота</label><input class="inp" id="tgT" type="password" value="${esc(bot.token||'')}" placeholder="123456789:AAH..."></div>
+        <button class="btn" onclick="TG.saveBot()">СОХРАНИТЬ ТОКЕН</button>
+        <p class="mut3" style="font-size:11.5px;margin:12px 4px 0">⚠️ Токен сохраняется в вашем разделе Firebase и используется прямо из браузера. Это допустимо для личного бота; для публичного продукта токен должен храниться только на backend.</p>
+      </div>
+
+      ${bot.token?`
+      <div class="sec-title">Шаг 2 · Привязка аккаунта</div>
+      <div class="card">
+        ${linked?`
+          <div class="row"><div class="ico">✅</div><div class="grow">
+            <div style="font-weight:700">Подключено</div>
+            <div class="mut" style="font-size:13px">chat_id: ${esc(tg.chatId)}${tg.username?' · @'+esc(tg.username):''}</div></div></div>
+          <button class="btn danger" style="margin-top:14px" onclick="Sub.tgDisconnect()">Отключить</button>
+        `:`
+          <div class="card" style="background:var(--card2);text-align:center">
+            <div class="mut" style="font-size:12px">ОДНОРАЗОВЫЙ ТОКЕН ПРИВЯЗКИ</div>
+            <div id="tgToken" style="font-size:26px;font-weight:800;letter-spacing:3px;margin:8px 0">${esc((tg.pending&&tg.pending.token)||'— — — — — —')}</div>
+            <div class="mut3" style="font-size:12px">Действует 10 минут</div>
+          </div>
+          <button class="btn soft" style="margin-top:12px" onclick="Sub.tgToken()">СГЕНЕРИРОВАТЬ ТОКЕН</button>
+          <p class="mut" style="font-size:13px;margin:14px 4px">Откройте бота${bot.username?` <b>@${esc(bot.username)}</b>`:''} и отправьте ему:<br><b>/start ВАШ_ТОКЕН</b></p>
+          ${bot.username?`<a class="btn ghost" href="https://t.me/${esc(bot.username)}" target="_blank" style="text-decoration:none">Открыть бота в Telegram</a>`:''}
+          <button class="btn" style="margin-top:10px" onclick="TG.link()">Я ОТПРАВИЛ — СВЯЗАТЬ</button>
+        `}
+      </div>`:''}
+
+      ${linked?`
+      <div class="sec-title">Отправить в Telegram</div>
+      <div class="card" style="padding:6px 18px">
+        <div class="list-item" onclick="TG.report('balance')"><div class="ico">💰</div><div class="grow" style="font-weight:600;font-size:14.5px">Баланс</div><span class="mut3">›</span></div>
+        <div class="list-item" onclick="TG.report('today')"><div class="ico">📊</div><div class="grow" style="font-weight:600;font-size:14.5px">Отчёт за сегодня</div><span class="mut3">›</span></div>
+        <div class="list-item" onclick="TG.report('month')"><div class="ico">📈</div><div class="grow" style="font-weight:600;font-size:14.5px">Отчёт за месяц</div><span class="mut3">›</span></div>
+        <div class="list-item" onclick="TG.report('payments')"><div class="ico">🔔</div><div class="grow" style="font-weight:600;font-size:14.5px">Ближайшие платежи</div><span class="mut3">›</span></div>
+        <div class="list-item" onclick="TG.report('goals')"><div class="ico">🎯</div><div class="grow" style="font-weight:600;font-size:14.5px">Прогресс целей</div><span class="mut3">›</span></div>
+      </div>
+      <div class="sec-title">Ответы на команды</div>
+      <div class="card">
+        <div class="row sp"><div class="grow"><div style="font-weight:600;font-size:14.5px">Отвечать на команды бота</div>
+          <div class="mut" style="font-size:12.5px">Работает, пока открыто это приложение</div></div>
+          <input type="checkbox" id="tgListen" ${TG.polling?'checked':''} onchange="TG.listen(this.checked)" style="width:46px;height:27px;accent-color:var(--accent)"></div>
+        <p class="mut3" style="font-size:11.5px;margin:12px 4px 0">Для круглосуточной работы бота нужен backend с webhook — браузер опрашивает Telegram только при открытой вкладке.</p>
+      </div>`:''}
+
+      <div class="sec-title">Команды бота</div>
+      <div class="card" style="padding:6px 18px">${[['/start','Привязка аккаунта'],['/balance','Текущий баланс'],['/today','Расходы за сегодня'],['/month','Отчёт за месяц'],
+        ['/expenses','Последние расходы'],['/payments','Ближайшие платежи'],['/goals','Прогресс целей'],['/settings','Настройки'],['/help','Справка']]
+        .map(([c,d])=>`<div class="list-item"><b style="font-family:monospace;font-size:13.5px;color:var(--accent)">${c}</b>
+        <div class="grow mut" style="font-size:13px;text-align:right">${d}</div></div>`).join('')}</div>`);
+  },
+  async tgToken(){
+    const t = Math.random().toString(36).slice(2,8).toUpperCase();
+    await DB.set('telegram/pending',{token:t,expiresAt:Date.now()+600000,createdAt:Date.now()});
+    if($('tgToken')) $('tgToken').textContent = t.split('').join(' ');
+    toast('Отправьте боту: /start '+t,'ok');
+  },
+  tgDisconnect(){ Sheet.confirm('Отключить Telegram?','Бот перестанет присылать отчёты.','Отключить',async()=>{
+      TG.listen(false); await DB.del('telegram/chatId'); await DB.del('telegram/username'); Sheet.close(); Sub.telegram(); }); },
+  export(){
+    subShell('📊 Экспорт данных',`<div class="card">
+      <div class="field"><label>Период</label><select class="inp" id="exP">
+        <option value="month">Текущий месяц</option><option value="year">Текущий год</option><option value="all">Всё время</option></select></div>
+      <button class="btn" onclick="Exp.csv()">⤓ Скачать CSV</button>
+      <button class="btn ghost" style="margin-top:10px" onclick="Exp.json()">⤓ Скачать JSON (полный бэкап)</button>
+      <button class="btn ghost" style="margin-top:10px" onclick="Exp.report()">🖨️ Отчёт для печати / PDF</button>
+      <p class="mut3" style="font-size:12px;margin:14px 4px 0">Отчёт включает доходы, расходы, категории, платежи, баланс и цели.</p></div>`);
+  },
+  privacy(){
+    subShell('📄 Конфиденциальность',`<div class="card" style="font-size:14px;line-height:1.6">
+      <p><b>Какие данные хранятся.</b> Имя, телефон, ваши операции, платежи, цели и настройки. Данные хранятся в вашем личном разделе Firebase и доступны только вам.</p>
+      <p><b>Что не хранится.</b> PIN в открытом виде, пароли (их хранит Firebase Authentication в хэшированном виде), реквизиты карт.</p>
+      <p><b>AI-помощник.</b> Работает с агрегированными показателями (баланс, суммы по категориям, платежи) и никогда не выполняет финансовые операции без вашего подтверждения.</p>
+      <p><b>Аналитика.</b> В аналитику не передаются суммы конкретных расходов, PIN, пароли и финансовые тексты.</p>
+      <p><b>Удаление.</b> Вы можете в любой момент удалить аккаунт — данные удаляются безвозвратно.</p>
+      <p><b>Экспорт.</b> Все данные можно выгрузить в CSV или JSON.</p></div>`);
+  }
+};
+
+/* ===================== ЭКСПОРТ ===================== */
+const Exp = {
+  filter(){ const p = $('exP')?$('exP').value:'all';
+    return txs().filter(t=>p==='all'?true:inRange(t.date,p)); },
+  dl(name,content,type){
+    const b=new Blob([content],{type:type}); const u=URL.createObjectURL(b);
+    const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+    toast('Файл выгружен ✓','ok');
+  },
+  csv(){
+    const rows=[['Дата','Тип','Название','Категория','Сумма','Валюта','Источник']];
+    Exp.filter().forEach(t=>rows.push([t.date,t.type==='income'?'Доход':'Расход',t.title||'',
+      t.type==='income'?'Доход':catOf(t.categoryId).n,String(t.amount).replace('.',','),cur(),t.source||'manual']));
+    Exp.dl('moy-budjet-'+today()+'.csv','\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\n'),'text/csv;charset=utf-8');
+  },
+  json(){ Exp.dl('moy-budjet-backup-'+today()+'.json',JSON.stringify(S.data,null,2),'application/json'); },
+  report(){
+    const t=totals('month'), cats=Object.entries(t.byCat).sort((a,b)=>b[1]-a[1]);
+    const w=window.open('','_blank');
+    if(!w) return toast('Разрешите всплывающие окна','err');
+    w.document.write(`<html><head><meta charset="utf-8"><title>Отчёт — МОЙ БЮДЖЕТ</title>
+      <style>body{font-family:Arial,sans-serif;padding:32px;color:#111}h1{margin:0 0 4px}table{width:100%;border-collapse:collapse;margin-top:16px}
+      td,th{padding:9px;border-bottom:1px solid #ddd;text-align:left;font-size:14px}th{background:#f4f6f8}.r{text-align:right}</style></head><body>
+      <h1>МОЙ БЮДЖЕТ — отчёт за месяц</h1><p>${esc((S.data.profile||{}).firstName||'')} ${esc((S.data.profile||{}).lastName||'')} · ${new Date().toLocaleDateString('ru-RU')}</p>
+      <table><tr><th>Показатель</th><th class="r">Сумма</th></tr>
+      <tr><td>Доход</td><td class="r">${money(t.inc)}</td></tr>
+      <tr><td>Расход</td><td class="r">${money(t.exp)}</td></tr>
+      <tr><td><b>Баланс</b></td><td class="r"><b>${money(balance())}</b></td></tr></table>
+      <h3>Расходы по категориям</h3><table><tr><th>Категория</th><th class="r">Сумма</th><th class="r">%</th></tr>
+      ${cats.map(c=>`<tr><td>${esc(catOf(c[0]).n)}</td><td class="r">${money(c[1])}</td><td class="r">${t.exp?Math.round(c[1]/t.exp*100):0}%</td></tr>`).join('')}</table>
+      <h3>Цели</h3><table><tr><th>Цель</th><th class="r">Прогресс</th></tr>
+      ${goalsList().map(g=>`<tr><td>${esc(g.name)}</td><td class="r">${fmt(g.currentAmount||0)} / ${money(g.targetAmount)}</td></tr>`).join('')||'<tr><td colspan=2>—</td></tr>'}</table>
+      <script>setTimeout(()=>window.print(),400)<\/script></body></html>`);
+    w.document.close();
+  }
+};
+
+/* ===================== AI-ПОМОЩНИК ===================== */
+const AI = {
+  open(){
+    $('aiInputBar').classList.remove('hide');
+    if(!S.aiMsgs.length) AI.push('a','Привет! Я ваш финансовый помощник 🤖\n\nСпросите, например:\n• Сколько я потратил в этом месяце?\n• Куда ушло больше всего денег?\n• Сколько я могу тратить в день?\n• Как дела с моей целью?\n\nИли просто напишите: «Купил брюки за 500 сомони» — я оформлю расход.');
+    AI.render();
+  },
+  push(role,text){ S.aiMsgs.push({role,text}); },
+  render(){
+    $('aiBody').innerHTML = S.aiMsgs.map(m=>`<div class="msg ${m.role==='u'?'u':'a'}">${esc(m.text)}</div>`).join('');
+    const el=$('v-ai'); setTimeout(()=>window.scrollTo(0,document.body.scrollHeight),40);
+  },
+  send(){
+    const q=$('aiQ').value.trim(); if(!q) return;
+    $('aiQ').value=''; AI.push('u',q); AI.render();
+    S.aiMsgs.push({role:'a',text:'…'}); AI.render();
+    setTimeout(()=>{ S.aiMsgs.pop(); const a=AI.answer(q); AI.push('a',a.text); AI.render();
+      if(a.after) a.after(); }, 420);
+  },
+  answer(q){
+    const s=q.toLowerCase().replace(/ё/g,'е');
+    const m=totals('month'), d=totals('day'), w=totals('week'), y=totals('year');
+    const bal=balance();
+    const now=new Date(), dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(), left=dim-now.getDate()+1;
+    const cats=Object.entries(m.byCat).sort((a,b)=>b[1]-a[1]);
+
+    /* быстрый расход текстом */
+    if(/(купил|потратил|оплатил|заплатил|взял)/.test(s) && /\d/.test(s)){
+      const r=Quick.detect(q);
+      if(r.amount>0){ window.__quick=r;
+        return {text:`Похоже на расход:\n\n${catOf(r.categoryId).e} ${r.title}\n−${money(r.amount)} · ${catOf(r.categoryId).n}\n\nПодтвердите сохранение — я не записываю операции без вашего согласия.`,
+          after:()=>setTimeout(()=>Quick.parse(),300)};
+      }
+    }
+    if(/баланс|сколько.*(осталось|есть|денег)|остаток/.test(s))
+      return {text:`💰 Ваш текущий баланс: ${money(bal)}\n\nЗа этот месяц:\n↑ Доход: ${money(m.inc)}\n↓ Расход: ${money(m.exp)}`};
+    if(/(сколько|что).*(потратил|расход)/.test(s) || /расходы/.test(s)){
+      if(/сегодня/.test(s)) return {text:`Сегодня вы потратили ${money(d.exp)}.` + (Object.keys(d.byCat).length?'\n\n'+Object.entries(d.byCat).map(([c,v])=>`${catOf(c).e} ${catOf(c).n} — ${money(v)}`).join('\n'):'')};
+      if(/недел/.test(s)) return {text:`За последние 7 дней: ${money(w.exp)}.`};
+      if(/год/.test(s)) return {text:`За текущий год вы потратили ${money(y.exp)}.`};
+      return {text:`За текущий месяц вы потратили ${money(m.exp)}.\n\nТоп категорий:\n`+(cats.slice(0,3).map(c=>`${catOf(c[0]).e} ${catOf(c[0]).n} — ${money(c[1])}`).join('\n')||'пока нет расходов')};
+    }
+    if(/куда|больше всего|топ|категор/.test(s)){
+      if(!cats.length) return {text:'В этом месяце расходов пока нет — данных для анализа нет.'};
+      return {text:`Больше всего денег ушло на категорию «${catOf(cats[0][0]).n}» — ${money(cats[0][1])} (${Math.round(cats[0][1]/m.exp*100)}% всех трат).\n\nПолный список:\n`+
+        cats.map(c=>`${catOf(c[0]).e} ${catOf(c[0]).n} — ${money(c[1])}`).join('\n')};
+    }
+    if(/в день|день до конца|можно тратить|дневной/.test(s)){
+      const upcoming = payInstances('all').filter(p=>p.status!=='paid'&&p.due>=today()&&p.due.slice(0,7)===today().slice(0,7))
+        .reduce((x,p)=>x+ +p.amount,0);
+      const free = bal-upcoming, perDay = free/left;
+      return {text:`До конца месяца ${left} дн.\n\nБаланс: ${money(bal)}\nПредстоящие платежи: ${money(upcoming)}\nСвободно: ${money(free)}\n\n👉 Можно тратить примерно ${money(Math.max(0,perDay))} в день.`};
+    }
+    if(/цел|накоп|коплю/.test(s)){
+      const g=goalsList(); if(!g.length) return {text:'У вас пока нет финансовых целей. Создайте цель во вкладке 🎯 — я рассчитаю, сколько нужно откладывать.'};
+      return {text:g.map(x=>{ const cu=+x.currentAmount||0,t=+x.targetAmount||1,pct=Math.round(cu/t*100),lft=Math.max(0,t-cu);
+        let extra=''; if(x.deadline){ const days=daysBetween(today(),x.deadline); const mo=Math.max(1,Math.ceil(days/30));
+          extra=`\n   Откладывайте ${money(lft/mo)} в месяц (осталось ${days} дн.)`; }
+        return `🎯 ${x.name}\n   ${fmt(cu)} / ${fmt(t)} — ${pct}%\n   Осталось: ${money(lft)}${extra}`; }).join('\n\n')};
+    }
+    if(/платеж|оплатит|должен|счет/.test(s)){
+      const l=payInstances('all').filter(p=>p.status!=='paid').slice(0,6);
+      if(!l.length) return {text:'Предстоящих платежей нет 🎉'};
+      return {text:'🔔 Ближайшие платежи:\n\n'+l.map(p=>`${catOf(p.categoryId).e} ${p.title} — ${money(p.amount)} · ${dLabel(p.due)}${p.status==='overdue'?' ⚠️ просрочен':''}`).join('\n')};
+    }
+    if(/лимит|бюджет/.test(s)){
+      const b=budgetState(); if(!b.length) return {text:'Лимиты не заданы. Установите их в Профиль → Бюджетные лимиты — я предупрежу при 80%.'};
+      return {text:'📉 Бюджеты этого месяца:\n\n'+b.map(x=>`${catOf(x.cid).e} ${catOf(x.cid).n} — ${fmt(x.used)} / ${fmt(x.limit)} (${x.pct}%)`).join('\n')};
+    }
+    if(/совет|как сэконом|оптимиз|анализ|отчет/.test(s)){
+      const tips=[];
+      if(m.exp>m.inc*0.9&&m.inc>0) tips.push('⚠️ Расходы близки к доходу — стоит сократить необязательные траты.');
+      if(cats[0]) tips.push(`Самая крупная категория — ${catOf(cats[0][0]).n} (${money(cats[0][1])}). Попробуйте установить по ней лимит.`);
+      const rep = txs().filter(t=>t.type==='expense'&&inRange(t.date,'month'));
+      const names={}; rep.forEach(t=>names[t.title]=(names[t.title]||0)+1);
+      const freq=Object.entries(names).filter(x=>x[1]>=3).sort((a,b)=>b[1]-a[1])[0];
+      if(freq) tips.push(`Повторяющийся расход: «${freq[0]}» — ${freq[1]} раз за месяц.`);
+      if(m.inc>0) tips.push(`Норма сбережений: ${Math.max(0,Math.round((m.inc-m.exp)/m.inc*100))}% дохода.`);
+      return {text:'📊 Краткий анализ:\n\n'+(tips.join('\n\n')||'Данных пока мало — добавьте несколько расходов.')};
+    }
+    if(/привет|салом|здравств|hello/.test(s)) return {text:`Здравствуйте, ${(S.data.profile||{}).firstName||'друг'}! 👋 Ваш баланс сейчас — ${money(bal)}. Чем помочь?`};
+    if(/спасибо|рахмат/.test(s)) return {text:'Всегда пожалуйста! 😊'};
+    return {text:`Я могу рассказать про:\n• баланс и остаток\n• расходы за день / неделю / месяц / год\n• топ категорий\n• сколько можно тратить в день\n• ваши цели и платежи\n• бюджетные лимиты и советы\n\nА ещё я оформляю расходы текстом: «Купил брюки за 500 сомони».`};
+  }
+};
+
+/* ===================== TELEGRAM BOT ===================== */
+const TG = {
+  polling:null, offset:0,
+  cfg(){ return (S.data&&S.data.telegram)||{}; },
+  token(){ return (TG.cfg().bot||{}).token||''; },
+  async api(method,params){
+    const t=TG.token(); if(!t) throw new Error('Сначала сохраните токен бота');
+    const r = await fetch('https://api.telegram.org/bot'+t+'/'+method,{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(params||{})});
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.description||'Ошибка Telegram');
+    return j.result;
+  },
+  async saveBot(){
+    const u=$('tgU').value.trim().replace(/^@/,''), t=$('tgT').value.trim();
+    if(!t) return toast('Введите токен бота','err');
+    try{
+      const me = await (async()=>{ const r=await fetch('https://api.telegram.org/bot'+t+'/getMe');
+        const j=await r.json(); if(!j.ok) throw new Error(j.description||'Неверный токен'); return j.result; })();
+      await DB.set('telegram/bot',{token:t,username:u||me.username,name:me.first_name||'',savedAt:Date.now()});
+      toast('Бот @'+(u||me.username)+' подключён ✓','ok'); Sub.telegram();
+    }catch(e){ toast('Токен не принят: '+e.message,'err'); }
+  },
+  async link(){
+    const pend = TG.cfg().pending;
+    if(!pend || !pend.token) return toast('Сначала сгенерируйте токен привязки','err');
+    if(Date.now()>pend.expiresAt) return toast('Токен истёк. Сгенерируйте новый.','err');
+    try{
+      const ups = await TG.api('getUpdates',{limit:100,offset:TG.offset||0});
+      const hit = ups.slice().reverse().find(u=>u.message && typeof u.message.text==='string'
+        && u.message.text.trim().toUpperCase().replace(/\s+/g,' ')==='/START '+pend.token);
+      if(!hit) return toast('Сообщение не найдено. Отправьте боту: /start '+pend.token,'err');
+      const chat = hit.message.chat;
+      await DB.upd('telegram',{chatId:String(chat.id),username:chat.username||null,connectedAt:Date.now(),pending:null});
+      TG.offset = ups[ups.length-1].update_id+1;
+      await TG.send('✅ Аккаунт «МОЙ БЮДЖЕТ» подключён!\n\nДоступные команды: /balance /today /month /payments /goals /help');
+      toast('Telegram подключён ✓','ok'); Sub.telegram();
+    }catch(e){ toast(e.message,'err'); }
+  },
+  async send(text){
+    const id = TG.cfg().chatId; if(!id) throw new Error('Аккаунт не привязан');
+    return TG.api('sendMessage',{chat_id:id,text:text});
+  },
+  text(kind){
+    const m=totals('month'), d=totals('day');
+    if(kind==='balance') return `💰 МОЙ БАЛАНС\n\nДоступно: ${money(balance())}\nДоход: ${money(m.inc)}\nРасход: ${money(m.exp)}`;
+    if(kind==='today'){ const c=Object.entries(d.byCat).sort((a,b)=>b[1]-a[1]);
+      return `📊 ОТЧЁТ ЗА СЕГОДНЯ\n\nПотрачено: ${money(d.exp)}\n\n`+(c.map(x=>`${catOf(x[0]).e} ${catOf(x[0]).n} — ${money(x[1])}`).join('\n')||'Расходов сегодня нет 👍'); }
+    if(kind==='month'){ const c=Object.entries(m.byCat).sort((a,b)=>b[1]-a[1]);
+      return `📈 ОТЧЁТ ЗА МЕСЯЦ\n\nДоход: ${money(m.inc)}\nРасход: ${money(m.exp)}\nОстаток: ${money(m.inc-m.exp)}\n\n`+(c.map(x=>`${catOf(x[0]).e} ${catOf(x[0]).n} — ${money(x[1])}`).join('\n')||'Расходов нет'); }
+    if(kind==='expenses'){ const l=txs().filter(t=>t.type==='expense').slice(0,10);
+      return `🧾 ПОСЛЕДНИЕ РАСХОДЫ\n\n`+(l.map(t=>`${catOf(t.categoryId).e} ${t.title} — ${money(t.amount)} · ${dLabel(t.date)}`).join('\n')||'Пока пусто'); }
+    if(kind==='payments'){ const l=payInstances('all').filter(p=>p.status!=='paid').slice(0,8);
+      return `🔔 БЛИЖАЙШИЕ ПЛАТЕЖИ\n\n`+(l.map(p=>`${catOf(p.categoryId).e} ${p.title} — ${money(p.amount)} · ${dLabel(p.due)}${p.status==='overdue'?' ⚠️':''}`).join('\n')||'Платежей нет 🎉'); }
+    if(kind==='goals'){ const g=goalsList();
+      return `🎯 ЦЕЛИ\n\n`+(g.map(x=>{const cu=+x.currentAmount||0,t=+x.targetAmount||1;
+        return `${x.name}\n${fmt(cu)} / ${fmt(t)} — ${Math.round(cu/t*100)}%\nОсталось: ${money(Math.max(0,t-cu))}`;}).join('\n\n')||'Целей пока нет'); }
+    if(kind==='settings'){ const i=(S.data.income&&S.data.income.main)||{};
+      return `⚙️ НАСТРОЙКИ\n\nВалюта: ${cur()}\nДоход: ${i.amount?money(i.amount)+' ('+(FREQ[i.frequency]||'')+')':'не задан'}\nЛимитов: ${budgetState().length}\nПлатежей: ${recurring().length}`; }
+    return `🤖 МОЙ БЮДЖЕТ\n\n/balance — баланс\n/today — расходы за сегодня\n/month — отчёт за месяц\n/expenses — последние расходы\n/payments — ближайшие платежи\n/goals — цели\n/settings — настройки`;
+  },
+  async report(kind){
+    try{ await TG.send(TG.text(kind)); toast('Отправлено в Telegram ✓','ok'); }
+    catch(e){ toast(e.message,'err'); }
+  },
+  listen(on){
+    if(TG.polling){ clearInterval(TG.polling); TG.polling=null; }
+    if(!on) return;
+    TG.polling = setInterval(TG.poll,4000); TG.poll();
+    toast('Бот отвечает на команды, пока открыто приложение','ok');
+  },
+  async poll(){
+    if(!TG.token() || !TG.cfg().chatId) return;
+    try{
+      const ups = await TG.api('getUpdates',{timeout:0,offset:TG.offset||0,allowed_updates:['message']});
+      for(const u of ups){
+        TG.offset = u.update_id+1;
+        const msg = u.message; if(!msg || !msg.text) continue;
+        if(String(msg.chat.id)!==String(TG.cfg().chatId)) continue;
+        const cmd = msg.text.trim().toLowerCase().split(/[\s@]/)[0];
+        const map={'/balance':'balance','/today':'today','/month':'month','/expenses':'expenses',
+                   '/payments':'payments','/goals':'goals','/settings':'settings','/help':'help','/start':'help'};
+        if(map[cmd]) await TG.send(TG.text(map[cmd]));
+        else {
+          const r = Quick.detect(msg.text);
+          if(r.amount>0) await TG.send(`Похоже на расход: ${catOf(r.categoryId).e} ${r.title} — ${money(r.amount)}\n\nОткройте приложение и подтвердите сохранение. Без подтверждения операция не записывается.`);
+          else await TG.send(TG.text('help'));
+        }
+      }
+    }catch(e){ /* сеть/лимиты — молча пропускаем */ }
+  },
+  async notifyPayments(){
+    if(!TG.cfg().chatId || !TG.token()) return;
+    const st=(S.data&&S.data.settings)||{}; if(st.notifications===false) return;
+    const sent = TG.cfg().sentReminders||{};
+    const due = payInstances('week').filter(p=>p.status!=='paid' && daysBetween(today(),p.due)<=(p.reminderDays||1));
+    for(const p of due){
+      const key = (p.rid+'_'+p.due).replace(/[.#$\[\]\/]/g,'_');
+      if(sent[key]) continue;
+      try{
+        await TG.send(`🔔 НАПОМИНАНИЕ\n\n${catOf(p.categoryId).e} ${p.title}\n${money(p.amount)}\n\nДата: ${dLabel(p.due)}`);
+        await DB.set('telegram/sentReminders/'+key,true);
+      }catch(e){}
+    }
+  }
+};
+
+/* ===================== PIN LOCK ===================== */
+const Lock = {
+  buf:'', mode:'check', tmp:null,
+  keys(){ $('keypad').innerHTML = [1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k=>
+      k===''?'<div></div>':`<button onclick="Lock.tap('${k}')">${k}</button>`).join(''); },
+  dots(){ document.querySelectorAll('#pinDots i').forEach((e,i)=>e.classList.toggle('on',i<Lock.buf.length)); },
+  show(mode,title,sub){ Lock.mode=mode; Lock.buf=''; Lock.keys(); Lock.dots();
+    $('lockTitle').textContent=title; $('lockSub').textContent=sub||''; $('lock').classList.add('active'); },
+  setup(change){ Lock.tmp=null; Lock.show(change?'new':'new','Придумайте PIN-код','4 цифры для входа'); },
+  hide(){ $('lock').classList.remove('active'); },
+  tap(k){
+    haptic();
+    if(k==='⌫'){ Lock.buf=Lock.buf.slice(0,-1); Lock.dots(); return; }
+    if(Lock.buf.length>=4) return;
+    Lock.buf+=k; Lock.dots();
+    if(Lock.buf.length===4) setTimeout(Lock.submit,140);
+  },
+  async submit(){
+    const pin=Lock.buf, h=await sha(pin+'|mb|'+S.uid);
+    if(Lock.mode==='new'){ Lock.tmp=h; Lock.show('confirm','Повторите PIN-код',''); return; }
+    if(Lock.mode==='confirm'){
+      if(h!==Lock.tmp){ Lock.fail('PIN не совпадает'); Lock.show('new','Придумайте PIN-код','Попробуйте ещё раз'); return; }
+      await DB.set('security',{pinEnabled:true,pinHash:h,biometricEnabled:false,updatedAt:Date.now()});
+      Lock.hide(); S.unlocked=true; toast('PIN установлен ✓','ok'); Sub.security(); return;
+    }
+    const sec=(S.data&&S.data.security)||{};
+    if(h===sec.pinHash){ S.unlocked=true; Lock.hide(); Nav.render(); }
+    else Lock.fail('Неверный PIN-код');
+  },
+  fail(msg){ const el=$('pinDots'); el.classList.add('shake'); setTimeout(()=>el.classList.remove('shake'),400);
+    Lock.buf=''; Lock.dots(); toast(msg,'err'); },
+  logout(){ Lock.hide(); auth.signOut(); }
+};
+
+/* ===================== НАВИГАЦИЯ ===================== */
+const Nav = {
+  go(v,keep){
+    S.view=v; haptic();
+    document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active',e.id==='v-'+v));
+    document.querySelectorAll('#nav button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+    $('aiInputBar').classList.toggle('hide',v!=='ai');
+    window.scrollTo(0,0);
+    if(!keep) Nav.render();
+    if(v==='search') setTimeout(()=>$('sQ').focus(),100);
+  },
+  render(){
+    if(!S.data) return;
+    Home.render();
+    if(S.view==='analytics') An.render();
+    else if(S.view==='goals') Goals.render();
+    else if(S.view==='profile') Profile.render();
+    else if(S.view==='payments') Pay.render();
+    else if(S.view==='history') Hist.render();
+    else if(S.view==='search') Search.run();
+    else if(S.view==='ai') AI.open();
+  }
+};
+document.querySelectorAll('#anSeg button').forEach(b=>b.onclick=()=>{S.anPeriod=b.dataset.p;An.render();});
+document.querySelectorAll('#payFilters .chip').forEach(b=>b.onclick=()=>{S.payFilter=b.dataset.f;Pay.render();});
+document.querySelectorAll('#hsFilters .chip').forEach(b=>b.onclick=()=>{S.hsFilter=b.dataset.f;Hist.render();});
+
+/* ===================== ЗАПУСК ===================== */
+let dataRef=null;
+auth.onAuthStateChanged(async user=>{
+  if(dataRef){ dataRef.off(); dataRef=null; }
+  if(!user){
+    S.uid=null; S.data=null; S.unlocked=false; S.aiMsgs=[]; Lock.hide();
+    setTimeout(()=>{ localStorage.mb_onb? show('auth') : Onb.start(); }, S.booted?0:1500);
+    S.booted=true; return;
+  }
+  S.uid=user.uid;
+  dataRef = db.ref('users/'+user.uid);
+  dataRef.on('value', async snap=>{
+    const first = !S.data;
+    S.data = snap.val() || {};
+    if(!S.data.profile){
+      S.data.profile = {firstName:'Пользователь',lastName:'',phone:user.email||'',currency:'TJS',onboarded:false};
+      await db.ref('users/'+user.uid+'/profile').set(S.data.profile);
+    }
+    Theme.apply(S.data.profile.theme);
+    if(!S.data.profile.onboarded){ Setup.start(); S.booted=true; return; }
+    await ensureIncome();
+    const sec=S.data.security||{};
+    show('app');
+    if(sec.pinEnabled && !S.unlocked){ Lock.show('check','Введите PIN-код','Для доступа к приложению'); }
+    else Lock.hide();
+    Nav.render();
+    if(first){ setTimeout(Notify.check,1200); setTimeout(TG.notifyPayments,2500); }
+    S.booted=true;
+  }, err=>{
+    toast('Нет доступа к базе данных. Проверьте правила Firebase.','err');
+  });
+});
+
+/* локальные напоминания */
+const Notify = {
+  check(){
+    const st=(S.data&&S.data.settings)||{};
+    if(st.notifications===false) return;
+    const due = payInstances('week').filter(p=>p.status!=='paid' && daysBetween(today(),p.due)<= (p.reminderDays||1));
+    if(due.length){
+      const p=due[0];
+      toast(`🔔 ${p.title} — ${money(p.amount)} · ${dLabel(p.due)}`);
+      if('Notification' in window && Notification.permission==='granted')
+        new Notification('МОЙ БЮДЖЕТ',{body:`${dLabel(p.due)}: ${p.title} — ${money(p.amount)}`});
+    }
+    const over = budgetState().filter(b=>b.pct>=80);
+    if(over.length && !due.length) setTimeout(()=>toast(`${over[0].pct>=100?'🔴 Лимит достигнут':'⚠️ Использовано '+over[0].pct+'% бюджета'}: ${catOf(over[0].cid).n}`),3000);
+  }
+};
+
+/* сплэш */
+setTimeout(()=>{ if(!S.booted && !auth.currentUser){ localStorage.mb_onb? show('auth') : Onb.start(); S.booted=true; } },1800);
+window.addEventListener('offline',()=>toast('Нет соединения. Данные сохранятся после подключения.','err'));
+window.addEventListener('online',()=>toast('Соединение восстановлено ✓','ok'));
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden && S.data && (S.data.security||{}).pinEnabled) S.unlocked=false;
+  else if(!document.hidden && S.data && (S.data.security||{}).pinEnabled && !S.unlocked && S.uid)
+    Lock.show('check','Введите PIN-код','Для доступа к приложению');
+});
+
+</script>
+</body>
+</html>
