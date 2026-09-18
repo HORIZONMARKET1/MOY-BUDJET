@@ -680,15 +680,24 @@ const Auth = {
     if(t==='login') OTP.stopPoll();
   },
   err(e){
-    const c = (e&&e.code)||'';
+    console.error('Auth/DB error:', e);
+    const c = ((e&&e.code)||'').toLowerCase();
+    const m = ((e&&e.message)||'').toLowerCase();
     if(c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found')) return 'Неверный телефон или пароль.';
     if(c.includes('email-already-in-use')) return 'Этот номер уже зарегистрирован. Выполните вход.';
     if(c.includes('weak-password')) return 'Пароль слишком короткий (минимум 6 символов).';
     if(c.includes('too-many-requests')) return 'Слишком много попыток. Попробуйте позже.';
     if(c.includes('network')) return 'Нет соединения. Проверьте интернет и попробуйте ещё раз.';
     if(c.includes('invalid-email')) return 'Проверьте формат номера телефона.';
-    if(c.includes('operation-not-allowed')) return 'В Firebase включите способ входа Email/Password.';
-    return 'Что-то пошло не так. Попробуйте ещё раз.';
+    if(c.includes('operation-not-allowed')) return 'В Firebase включите способ входа Email/Password (Authentication → Sign-in method).';
+    if(c.includes('configuration-not-found')) return 'В Firebase не активирован раздел Authentication. Откройте Firebase Console → Authentication → нажмите «Get started» → включите Email/Password.';
+    if(c.includes('unauthorized-domain')) return 'Этот сайт не в списке разрешённых. Добавьте домен в Firebase → Authentication → Settings → Authorized domains.';
+    if(c.includes('permission_denied')||m.includes('permission_denied')) return 'База данных отклонила запись. Проверьте правила Realtime Database → Rules (нужен доступ auth.uid === $uid).';
+    if(c.includes('invalid-api-key')||c.includes('api-key')) return 'Неверный apiKey в firebaseConfig. Проверьте настройки проекта.';
+    if(c.includes('app-check')) return 'Заблокировано Firebase App Check. Отключите App Check или настройте его для этого домена.';
+    if(m.includes('failed to fetch')||m.includes('load failed')) return 'Не удалось соединиться с Firebase. Проверьте интернет и адрес databaseURL.';
+    const hint = (e&&(e.code||e.message)) ? ' ('+(e.code||e.message)+')' : '';
+    return 'Что-то пошло не так'+hint+'. Попробуйте ещё раз.';
   },
   async login(ev){
     ev.preventDefault(); const b=$('lgBtn'); b.disabled=true; b.textContent='ВХОД…';
